@@ -30,6 +30,14 @@ $0584: state variable B
 | 81: air, right
 | 82: air, left
 
+$0052: simon's horizontal speed
+| FF: right
+| 00: stopped
+| 01: left
+$0051: $FF iff simon-hspeed is $FF.
+
+$96A1: hit invulnerability timer
+
 ### Simon vspeed state
 $04DC: vertical speed (magnitude).
 | start of jump: 90
@@ -54,3 +62,6 @@ hack: 8294 (in air) -> 3BBA
 
 standard jump code: 9482
 custom jump code: BA3B
+
+standard knockback code: 965B
+custom knockback code: BAAA

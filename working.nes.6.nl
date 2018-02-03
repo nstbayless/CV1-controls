@@ -18,3 +18,10 @@ $BA87#return -------#
 $BA8A#null-vspeed#
 $BA7F#v-neutralize#
 $93C5#fall off cliff#
+$BAAA#custom knockback#
+$96A1#arrest knockback#
+$965B#knockback#
+$BAC6#zero-hspeed#
+$BAC8#return ----#
+$BAC1#left#
+$BABA#right#

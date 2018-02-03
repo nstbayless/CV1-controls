@@ -13,6 +13,10 @@ $003E#DC-simon-on-stairs#
 $0070#DC-whip-length#
 $0071#DC-heart-count#
 $0044#DC-life-meter-graphic#
-$0045#DC-life-meter-actual#
+$0045#simon-hp#
 $04DC#simon-vspeed#
 $0049#simon-hspeed#
+$0514#simon-vdir#
+$0052#simon-hspeed#
+$0051#simon-subhspeed#
+$0100#simon-hitframes#
