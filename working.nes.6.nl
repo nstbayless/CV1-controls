@@ -12,9 +12,9 @@ $BA5A#turn left#
 $BA63#reset facing (cond)#
 $BA6D#check for v-neutralize#
 $9757#fall action#
-$93D3#fall of cliff#
 $BA73#v-neutralize attempt#
 $BA8E#return ---#
 $BA87#return -------#
 $BA8A#null-vspeed#
 $BA7F#v-neutralize#
+$93C5#fall off cliff#
