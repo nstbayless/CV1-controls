@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# go to root directory of git repo:
+_rdir=`git rev-parse --show-toplevel`
+cd $_rdir
+
+# make sure base.nes and working.nes exist:
+if [ ! -f ./base.nes ]
+then
+  >&2 echo "Base ROM (base.nes) is not found! Aborting commit."
+  >&2 echo "Add a base.nes ROM or commit again with --no-verify"
+  exit 1;
+fi
+
+if [ ! -f ./working.nes ]
+then
+  >&2 echo "Modified ROM (working.nes) is not found! Aborting commit."
+  >&2 echo "(Did you ever generate working.nes with apply.sh?)"
+  >&2 echo "Generate working.nes or commit again with --no-verify"
+  exit 2;
+fi
+
+echo "Checking if patch is up-to-date..."
+
+# generate patch
+./make-patch.sh .patch-prev.ips >/dev/null
+
+if [ ! $? -eq 0 ]
+then
+  chmod +wrx .patch-prev.ips
+  rm .patch-prev.ips
+  echo "Unable to generate a patch for comparison"
+  exit 2;
+fi
+
+test=`diff patch.ips .patch-prev.ips`
+
+chmod +wrx .patch-prev.ips
+rm .patch-prev.ips
+
+if [ ! -z "$test" ]
+then
+  >&2 echo "Cannot commit while patch.ips is not up-to-date!"
+  >&2 echo "(Either run ./make-patch.sh to bring patch.ips up to date, or commit again with --no-verify)"
+  exit 1;
+fi
+
+test=`git diff patch.ips`
+if [ ! -z "$test" ]
+then
+	>&2 echo "Warning: patch.ips is not staged for commit!"
+	>&2 echo "(Either git add patch.ips or commit again with --no-verify)"
+	exit 3;
+fi
+
+echo "Patch is up to date."
+
+# pause to read input if successful:
+sleep 0.1
+
+exit 0
+;
