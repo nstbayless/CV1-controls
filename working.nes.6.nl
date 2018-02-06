@@ -1,26 +1,35 @@
-$944A#Simon direction#
-$9A62#simon-round-y#
-$9482#Simon air code#
+$934C#simon-step-dispatch#
 $936B#Simon Jump Table#
 $936C#Simon Jump Table#
-$BA45#neutral#
-$BA4C#check right#
-$BA51#turn right#
-$BA5B#turn left#
-$BA64#reset facing (cond)#
-$BA6E#check for v-neutralize#
-$9757#fall action#
-$BA74#v-neutralize attempt#
-$BA8F#return ---#
-$BA88#return -------#
-$BA8B#null-vspeed#
-$BA80#v-neutralize#
 $93C5#fall off cliff#
-$BAAA#custom knockback#
-$96A1#arrest knockback#
+$944A#Simon direction#
+$9482#Simon air code#
 $965B#knockback#
-$BAC6#zero-hspeed#
-$BAC8#return ----#
-$BAC1#left#
-$BABA#right#
+$96A1#arrest knockback#
+$9757#fall action#
+$9A62#simon-round-y#
+$B859#faux-dispatch-2#
+$B8A4#faux-dispatch-1#
 $BA3C#custom aerial step event#
+$BA4A#neutral#
+$BA51#check right#
+$BA56#turn right#
+$BA60#turn left#
+$BA69#reset facing (cond)#
+$BA73#check for v-neutralize#
+$BA79#v-neutralize attempt#
+$BA85#v-neutralize#
+$BA8D#return -------#
+$BA90#null-vspeed#
+$BA94#return ---#
+$BAAF#custom knockback#
+$BABF#right#
+$BAC6#left#
+$BACB#zero-hspeed#
+$BACD#return ----#
+$BAD0#can-hack#
+$BA9D#return --#
+$BA9F#(cutscene special)#
+$BAD5#cutscene-fall#
+$93D6#return ----#
+$A1E5#simon dies#

@@ -13,6 +13,7 @@ $046C: state variable A
 | 1: jumping
 | 2: attacking
 | 3: crouching
+| 8: dead?
 
 $434: attack variable
 | 00: not attacking
@@ -50,7 +51,9 @@ $0488: an increasing counter related to simon's animation. Value at crest: 16
 
 ### Other
 
-$00F7: held down buttons
+$0017: "Game Mode" (see "Game-mode-specific step code" below)
+$00F5: buttons pressed this frame
+$00F7: held down buttons (includes buttons pressed this frame)
 $0042: time remaining in seconds (last two digits).
 
 ## ROM
@@ -67,3 +70,17 @@ standard knockback code: 965B
 custom knockback code: BAAA
 
 custom code in ROM: 0x01ba4b
+
+### Game-mode-specific step code
+step dispatch: 07:c1A1 (ROM 01c1b1)
+jump-to-table subroutine: 07:CA1E (ROM 01ca2e)
+jump table: 07:C1B1 (ROM 01C1C0) | contents: DCB7 23B8 59B8 D2B8 11B9 EFC1 8FC2 DDC2 33C3 98C4 98C4 9386 A6C5 F8C7 EE86 4B8B FEFA A908 8525
+
+Jumps off of "Game mode" value in $18
+$18 values
+| 0: first frame of game
+| 1: title screen
+| 2: title screen demo gameplay
+| 5: normal gameplay; pre-demo loading (~17 frames)
+| 6: dead; reload level (and post-demo 1, due to death)
+| 7: game over
