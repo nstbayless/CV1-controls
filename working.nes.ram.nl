@@ -23,3 +23,5 @@ $0100#simon-hitframes#
 $04F8#vspeed-map#
 $054C#post-hit-timer#
 $038C#simon-x-on-screen#
+$00F5#pressed-buttons#
+$00F7#held-buttons#

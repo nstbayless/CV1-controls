@@ -13,7 +13,8 @@ $046C: state variable A
 | 1: jumping
 | 2: attacking
 | 3: crouching
-| 8: dead?
+| 8: dead
+| 9: stunned
 
 $434: attack variable
 | 00: not attacking
@@ -66,9 +67,6 @@ hack: 8294 (in air) -> 3CBA
 
 standard jump code: 9482
 custom jump code: BA3C
-
-standard knockback code: 965B
-custom knockback code: BAAA
 
 custom code in ROM: 0x01ba4b
 

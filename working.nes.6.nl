@@ -22,11 +22,7 @@ $BA85#v-neutralize#
 $BA8D#return -------#
 $BA90#null-vspeed#
 $BA94#return ---#
-$BAAF#custom knockback#
 $BABF#right#
-$BAC6#left#
-$BACB#zero-hspeed#
-$BACD#return ----#
 $BAD0#can-hack#
 $BAD5#cutscene-fall#
 $93D6#return ----#
@@ -41,3 +37,10 @@ $970B#speed-0-to-5-in-$0#
 $9A5B#AND-$3c#
 $9479#fall off stairs#
 $9809#hspeed-edit#
+$BAC3#normal knockback#
+$BAC0#return#
+$BAC2#return#
+$BAAA#custom knockback#
+$BAA3#custom knockback#
+$BAC1#normal knockback#
+$97F2#stunned#
