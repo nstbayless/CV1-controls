@@ -9,7 +9,7 @@ $0022#paused#
 $0028#DC-current-stage#
 $002A#DC-lives#
 $002E#DC-camera-x#
-$003E#DC-simon-on-stairs#
+$003E#DC-simon-off-stairs#
 $0070#DC-whip-length#
 $0071#DC-heart-count#
 $0044#DC-life-meter-graphic#
@@ -20,3 +20,6 @@ $0514#simon-vdir#
 $0052#simon-hspeed#
 $0051#simon-subhspeed#
 $0100#simon-hitframes#
+$04F8#vspeed-map#
+$054C#post-hit-timer#
+$038C#simon-x-on-screen#

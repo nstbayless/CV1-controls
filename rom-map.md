@@ -31,7 +31,8 @@ $0584: state variable B
 | 81: air, right
 | 82: air, left
 
-$0052: simon's horizontal speed
+$0049: simon's horizontal speed (?)
+$0052: simon's horizontal speed (?)
 | FF: right
 | 00: stopped
 | 01: left
