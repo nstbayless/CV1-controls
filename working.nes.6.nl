@@ -45,3 +45,4 @@ $BAC1#normal knockback#
 $97F2#stunned#
 $9586#stairs#
 $BA9F#custom knockback#
+$BACC#can-control#
