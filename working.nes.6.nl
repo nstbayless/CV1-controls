@@ -41,6 +41,7 @@ $BAC3#normal knockback#
 $BAC0#return#
 $BAC2#return#
 $BAAA#custom knockback#
-$BAA3#custom knockback#
 $BAC1#normal knockback#
 $97F2#stunned#
+$9586#stairs#
+$BA9F#custom knockback#

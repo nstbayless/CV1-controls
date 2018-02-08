@@ -11,8 +11,12 @@ $0450: Facing. 1 if left, 0 if right.
 $046C: state variable A
 | 0: standing/walking
 | 1: jumping
-| 2: attacking
+| 2: attacking & subweapon
 | 3: crouching
+| 4: stairs
+| 5: knockback
+| 6: walk to stair
+| 7: falling
 | 8: dead
 | 9: stunned
 
@@ -50,6 +54,10 @@ $514: vertical direction
 | 0: up
 | 1: down
 $0488: an increasing counter related to simon's animation. Value at crest: 16
+
+$054c: Stun timer. This must not
+be negative when simon begins jumping or the
+game will freak out.
 
 ### Other
 
