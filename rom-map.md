@@ -76,6 +76,8 @@ hack: 8294 (in air) -> 3CBA
 standard jump code: 9482
 custom jump code: BA3C
 
+custom stair code: BAF7
+
 custom code in ROM: 0x01ba4b
 
 ### Game-mode-specific step code

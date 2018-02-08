@@ -46,3 +46,7 @@ $97F2#stunned#
 $9586#stairs#
 $BA9F#custom knockback#
 $BACC#can-control#
+$BAF7#custom-stairs#
+$9401#check-jump#
+$940C#begin jump#
+$9511#simon-ground#
