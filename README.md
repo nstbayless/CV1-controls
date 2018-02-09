@@ -16,4 +16,4 @@ control while in the air.
 - When releasing the jump button, one immediately starts falling again; this allows the player to make smaller hops if desired.
 - After being knocked back, the player regains control after a split second and can angle their fall.
 - When walking off an edge, the player retains control instead of dropping straight down.
-- All characters can jump off of stairs at any point in the climb (however, it is still impossible to land on stairs, so be careful jumping from long flights of stairs over pits)
+- The player can jump off of stairs at any point in the climb (however, it is still impossible to land on stairs, so be careful jumping from long flights of stairs over pits)
