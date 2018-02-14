@@ -6,6 +6,9 @@ This hack for Castlevania modernizes the control scheme to make it more
 like Symphony of the Night and Mega Man, allowing the player more
 control while in the air.
 
+This branch of the repo introduces compatibility with
+the ["Ultimate Castlevania" ROMHack](http://www.romhacking.net/hacks/3736/).
+
 ## Using or Contributing to This Repository
 
 [Read instructions here.](./SETUP.md)
