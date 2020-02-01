@@ -1,12 +1,14 @@
-; cl65 complains if these aren't defined.
-.segment "STARTUP"
-.segment "INIT"
-.segment "ONCE"
-.segment "CODE"
+; cc65 complains if these are not defined.
 
-; use base's .nes header
+; header
+.segment "HEADER"
+
 .incbin "base.nes", $0, $10
 
-; include original nes ROM.
-.org $10
-.incbin "base.nes", $10, $8000
+.segment "ROM0"
+.segment "STARTUP"
+.segment "VECTORS"
+.segment "CODE"
+
+.org $0
+.byte $3c, $ba

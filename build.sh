@@ -1,13 +1,16 @@
 # note: asm6f must be on the PATH.
 if [ -f "base.nes" ]
 then
-    which cl65 > /dev/null
+    chmod a-w base.nes
+    which nesasm > /dev/null
     if [ $? != 0 ]
     then
-        echo "cl65/cc65 is not on the PATH."
+        echo "nesasm is not on the PATH."
         exit
     fi
-    cl65 patch.s -o patch.nes
+    cl65 patch.s -C ./nes.cfg -o patch.nes -v
+    
+    #exit
     
     if ! [ -f patch.nes ]
     then

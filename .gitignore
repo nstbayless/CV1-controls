@@ -7,3 +7,4 @@ patch.ips
 *.o
 .patch-prev.ips
 *.log
+*.fns
