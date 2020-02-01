@@ -1,6 +1,9 @@
 base.nes
 working.nes
 edit.nes
+patch.nes
+patch.ips
 *.bin
+*.o
 .patch-prev.ips
 *.log
