@@ -1,0 +1,6 @@
+base.nes
+working.nes
+edit.nes
+*.bin
+.patch-prev.ips
+*.log
