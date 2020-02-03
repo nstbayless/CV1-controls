@@ -8,3 +8,4 @@ patch.ips
 .patch-prev.ips
 *.log
 *.fns
+disasm.a65

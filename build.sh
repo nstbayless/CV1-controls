@@ -2,32 +2,41 @@
 if [ -f "base.nes" ]
 then
     chmod a-w base.nes
-    which nesasm > /dev/null
+    which asm6f > /dev/null
     if [ $? != 0 ]
     then
-        echo "nesasm is not on the PATH."
+        echo "asm6f is not on the PATH."
         exit
     fi
-    cl65 patch.s -C ./nes.cfg -o patch.nes -v
+    asm6f patch.asm
     
     #exit
-    
-    if ! [ -f patch.nes ]
+    if ! [ -f patch.bin ]
     then
-        echo "Failed to create patch.o"
+        echo
+        echo "Failed to create patch.bin"
         exit
     fi
+    echo
     
-    # ips patch
+    if [ -f patch.nes ]
+    then
+        rm "patch.nes"
+    fi
+    
+    mv patch.bin patch.nes
+    echo
+    
+    # create ips patch
     chmod a+x flips/flips-linux
-    flips/flips-linux --create --ips base.nes patch.nes patch.ips
+    flips/flips-linux --create base.nes patch.nes patch.ips
     if ! [ -f "patch.ips" ]
     then
         echo "flips patch generation failed."
         exit
     fi
-    echo "Patch generated."
-
+    echo "patch generated."
+    
     # ipsnect map
     echo
     ipsnect patch.ips
@@ -36,7 +45,7 @@ then
         echo
         echo
         echo "ipsnect failed. (Is ipsnect on the PATH?)"
-        echo "(this step is optional.)"
+        echo "(this step is optional anyway.)"
         exit
     fi
     echo

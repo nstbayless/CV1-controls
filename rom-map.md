@@ -70,15 +70,6 @@ $0042: time remaining in seconds (last two digits).
 
 06:944A: simon step event turn around
 01937C: Jump Table
-default value: 809382941195399586955B9620975797AA97F297A545F00210034CE5A1201D9A
-hack: 8294 (in air) -> 3CBA
-
-standard jump code: 9482
-custom jump code: BA3C
-
-custom stair code: BAF7
-
-custom code in ROM: 0x01ba4b
 
 ### Game-mode-specific step code
 step dispatch: 07:c1A1 (ROM 01c1b1)
