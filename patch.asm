@@ -153,7 +153,7 @@ SKIP 4
 ; inside player's cliff-falling routine.
 FROM $93ca
 
-    LDA $11
+    LDA #$0D
     STA player_v_animation_counter
     NOP
     LDA #$01
@@ -274,8 +274,9 @@ cutscene_fall:
     STA player_hspeed_1
     LDX player_facing
     INX
-unknown_func_n1: ; unknown_func is 1 byte after this.
     STX player_state_b
+set_falling:
+    ; note that setting falling causes 
     LDA #$07
     STA player_state_a
     RTS
@@ -284,11 +285,13 @@ unknown_func_n1: ; unknown_func is 1 byte after this.
 custom_handle_cliff_drop:
     JSR can_control
     BNE cutscene_fall
+    
+    ; if the player stun timer is not negative when a jump begins,
+    ; the game totally freaks out.
     LDA #$00
     STA player_stun_timer
-    BNE unknown_func
     LDA vspeed_map
-    BEQ unknown_func
+    BEQ set_falling
     BNE store_vspeed_magnitude
     
 ; ------------------------------------
@@ -313,9 +316,6 @@ control_handle_stair:
 ; ------------------------------------
 ; definitions of some existing addresses
 SUPPRESS
-
-BASE unknown_func_n1 + 1
-unknown_func:               db 0
 
 BASE $940C
 begin_jump:                 db 0
