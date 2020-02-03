@@ -8,7 +8,7 @@ then
         echo "asm6f is not on the PATH."
         exit
     fi
-    asm6f patch.asm
+    asm6f patch.asm -l
     
     #exit
     if ! [ -f patch.bin ]
@@ -39,7 +39,7 @@ then
     
     # ipsnect map
     echo
-    ipsnect patch.ips
+    ipsnect patch.ips > patch.map
     if [ $? != 0 ]
     then
         echo

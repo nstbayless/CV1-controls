@@ -1,4 +1,4 @@
-incnes "base.nes"
+INCNES "base.nes"
 
 ; macros
 SEEK EQU SEEKABS
@@ -7,7 +7,7 @@ SKIP EQU SKIPREL
 MACRO SUPPRESS
     ENUM $
 ENDM
-ENDSUP EQU ENDE
+ENDSUPRESS EQU ENDE
 
 MACRO SKIPTO pos
     if ($ >= 0)
@@ -29,27 +29,30 @@ ENDM
 ; memory address values
 ENUM $0
 
+; FF: right
+; 00: stopped
+; 01: left
 BASE $49
-simon_hspeed_1: db 0
-
-BASE $51
-;$FF iff simon-hspeed is $FF.
-simon_hspeed_ff: db 0
+player_hspeed_1: db 0
 
 ; FF: right
 ; 00: stopped
 ; 01: left
 BASE $52
-simon_hspeed_2: db 0
+player_hspeed_2: db 0
+
+BASE $51
+;$FF iff player-hspeed is $FF.
+player_hspeed_ff: db 0
 
 ; @ facing. 1 if left, 0 if right.
-BASE $0450
+BASE $450
 player_facing: db 0
 
 ; start of jump: 90
 ; crest: A4->A2
 ; end: 8F
-BASE $04DC
+BASE $4DC
 player_vspeed_magnitude: db 0
 
 ; 0: up
@@ -58,7 +61,7 @@ BASE $514
 player_vspeed_direction: db 0
 
 BASE $488
-; an increasing counter related to simon's animation. Value at crest: 16
+; an increasing counter related to player's animation. Value at crest: 16
 player_v_animation_counter: db 0
 
 ; @ player state
@@ -96,10 +99,14 @@ BASE $584
 player_state_b: db 0
 
 ; Stun timer. This must not
-; be negative when simon begins jumping or the
+; be negative when player begins jumping or the
 ; game will freak out.
 BASE $54C
 player_stun_timer: db 0
+
+; player hitpoints
+BASE $45
+player_hp: db 0
 
 ; "Game Mode"
 ; 0: first frame of game
@@ -123,6 +130,8 @@ button_down: db 0
 BASE $42
 time_remaining_b: db 0
 
+BASE $04F8
+vspeed_map: db 0
 
 ENDE
 
@@ -141,24 +150,24 @@ SKIP 4
     dw custom_handle_stair
 
 ; --------------------------------------
-; inside simon's cliff-falling routine.
+; inside player's cliff-falling routine.
 FROM $93ca
 
     LDA $11
-    STA $0488
+    STA player_v_animation_counter
     NOP
     LDA #$01
-    STA $046C
+    STA player_state_a
     NOP
-    JMP $BAE4
+    JMP custom_handle_cliff_drop
 
 ; --------------------------------------
 ; Originally this code calculated which direction
-; Simon should move in while being knocked back.
+; player should move in while being knocked back.
 ; Now it jumps to a subroutine below.
 FROM $970b
 
-    JSR $BA9F
+    JSR custom_knockback
     NOP
     NOP
     NOP
@@ -170,118 +179,151 @@ FROM $970b
 FROM $BA3C
 
 custom_handle_jump:
-    JSR $BACC
-    BNE $BA8D
-    LDY $0450
-    LDA $F7
+    JSR can_control
+    BNE RETURNA
+    LDY player_facing
+    LDA button_down
     AND #$03
-    BNE $BA51
+    BNE check_right
     LDA #$80
-    STA $0584
-    BNE $BA73
+    STA player_state_b
+    BNE check_v_cancel
+check_right:
     LDX #$00
     LSR A
-    BCC $BA60
-    STX $0450
+    BCC turn_left
+turn_right:
+    STX player_facing
     LDX #$81
-    STX $0584
-    BCS $BA69
+    STX player_state_b
+    BCS check_reset_facing
+turn_left:
     INX
-    STX $0450
+    STX player_facing
     LDX #$82
-    STX $0584
-    LDA $0434
+    STX player_state_b
+check_reset_facing:
+    LDA player_state_atk
     CMP #$00
-    BEQ $BA73
-    STY $0450
-    LDA $F7
+    BEQ check_v_cancel
+    STY player_facing
+check_v_cancel:
+    LDA button_down
     AND #$80
-    BNE $BA8D
-    LDA $0514
-    BNE $BA8D
-    LDA $04DC
+    BNE RETURNA
+    LDA player_vspeed_direction
+    BNE RETURNA
+    LDA player_vspeed_magnitude
     CMP #$95
-    BMI $BA8D
-    JSR $BA90
+    BMI RETURNA
+    JSR v_cancel
     LDA #$17
-    STA $0488
-    JMP $9482
+    STA player_v_animation_counter
+RETURNA:
+    JMP player_air_code
+    
+; ------------------------------------
+v_cancel:
     LDA #$01
-    STA $0514
+    STA player_vspeed_direction
     LDA #$A2
-    STA $04DC
-    RTS ;-----------------------------
+store_vspeed_magnitude:
+    STA player_vspeed_magnitude
+    RTS
     
-    ; add some junk data for no reason
-    ; TODO: remove this.
-    DB $ff
-    DB $ff
-    DB $ff
-    DB $ff
-    
-    ; Additional functions
+; ------------------------------------
+custom_knockback:
     LDA $45
-    BEQ $BAC1
-    JSR $BACC
-    BNE $BAC1
-    LDA $04DC
+    BEQ knockback_standard
+    JSR can_control
+    BNE knockback_standard
+    LDA player_vspeed_magnitude
     CMP #$B3
-    BPL $BAC1
-    LDA $0514
-    BEQ $BAC1
-    LDA $F7
+    BPL knockback_standard
+    LDA player_vspeed_direction
+    BEQ knockback_standard
+    LDA button_down
     AND #$03
-    BEQ $BAC0
+    BEQ RETURNB
     CMP #$03
-    BNE $BAC0
+    BNE RETURNB
     LDA $00
-    RTS ;------------------------------
-    LDA $0450
+RETURNB:
+    RTS
+    
+; ------------------------------------
+knockback_standard:
+    LDA player_facing
     CLC
     ADC #$01
     EOR #$03
-    RTS ;------------------------------
+    RTS
     
-    ; add some junk data for no reason
-    ; TODO: remove this.
-    DB $ff
-    DB $ff
+; ------------------------------------
+; const function, determines whether or not can currently control.
+; (Z if can control, z if cannot)
+can_control:
+    LDA player_hp
+    BEQ +             ; illegible, but this produces correct behaviour
+    LDA game_mode
+  + CMP #$05
+    RTS
     
-    ; code continues
-    LDA $45
-    BEQ $BAD2
-    LDA $18
-    CMP #$05
-    RTS ;------------------------------
-    STA $49
-    LDX $0450
+; ------------------------------------
+cutscene_fall:
+    STA player_hspeed_1
+    LDX player_facing
     INX
-    STX $0584
+unknown_func_n1: ; unknown_func is 1 byte after this.
+    STX player_state_b
     LDA #$07
-    STA $046C
-    RTS ;------------------------------
-    JSR $BACC
-    BNE $BAD5
-    LDA #$00
-    STA $054C
-    BNE $BADC
-    LDA $04F8
-    BEQ $BADC
-    BNE $BA97
-    ; no fallthrough
+    STA player_state_a
+    RTS
     
+; ------------------------------------
+custom_handle_cliff_drop:
+    JSR can_control
+    BNE cutscene_fall
+    LDA #$00
+    STA player_stun_timer
+    BNE unknown_func
+    LDA vspeed_map
+    BEQ unknown_func
+    BNE store_vspeed_magnitude
+    
+; ------------------------------------
 custom_handle_stair:
-    JSR $BACC
-    BEQ $BAFF
-    JMP $9586
-    LDA $F5
+    JSR can_control
+    BEQ control_handle_stair
+jump_to_stairs:
+    JMP stairs
+    
+; ------------------------------------
+control_handle_stair:
+    LDA button_press
     AND #$80
-    BEQ $BAFC
-    LDA $0434
-    BNE $BAFC
-    JSR $940C
+    BEQ jump_to_stairs
+    LDA player_state_atk
+    BNE jump_to_stairs
+    JSR begin_jump
     LDA #$01
-    STA $046C
-    JMP $9482
+    STA player_state_a
+    JMP player_air_code
 
-SEEK 10
+; ------------------------------------
+; definitions of some existing addresses
+SUPPRESS
+
+BASE unknown_func_n1 + 1
+unknown_func:               db 0
+
+BASE $940C
+begin_jump:                 db 0
+
+BASE $9586
+stairs:                     db 0
+
+BASE $9482
+player_air_code: db 0
+
+ENDSUPRESS

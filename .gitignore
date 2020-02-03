@@ -3,9 +3,11 @@ working.nes
 edit.nes
 patch.nes
 patch.ips
+patch.lst
 *.bin
 *.o
 .patch-prev.ips
 *.log
 *.fns
 disasm.a65
+patch.map
