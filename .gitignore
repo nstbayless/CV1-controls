@@ -4,6 +4,7 @@ edit.nes
 patch.nes
 patch.ips
 patch.lst
+*.cdl
 *.bin
 *.o
 .patch-prev.ips
@@ -11,3 +12,5 @@ patch.lst
 *.fns
 disasm.a65
 patch.map
+patch.*.nl
+patch.*.deb

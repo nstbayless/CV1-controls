@@ -8,23 +8,15 @@ then
         echo "asm6f is not on the PATH."
         exit
     fi
-    asm6f patch.asm -l
+    asm6f -l -c -n patch.asm patch.nes
     
     #exit
-    if ! [ -f patch.bin ]
+    if ! [ -f patch.nes ]
     then
         echo
-        echo "Failed to create patch.bin"
+        echo "Failed to create patch.nes"
         exit
     fi
-    echo
-    
-    if [ -f patch.nes ]
-    then
-        rm "patch.nes"
-    fi
-    
-    mv patch.bin patch.nes
     echo
     
     # create ips patch
