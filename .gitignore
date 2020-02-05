@@ -1,4 +1,4 @@
-base.nes
+base*.nes
 working.nes
 edit.nes
 patch.nes
@@ -14,3 +14,4 @@ disasm.a65
 patch.map
 patch.*.nl
 patch.*.deb
+export

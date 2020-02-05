@@ -1,5 +1,7 @@
 INCNES "base.nes"
 
+CLEARPATCH
+
 ; macros
 SEEK EQU SEEKABS
 SKIP EQU SKIPREL

@@ -1,30 +1,31 @@
 # note: asm6f must be on the PATH.
-if [ -f "base.nes" ]
+BASE=base.nes
+if [ -f "$BASE" ]
 then
-    chmod a-w base.nes
+    chmod a-w $BASE
     which asm6f > /dev/null
     if [ $? != 0 ]
     then
         echo "asm6f is not on the PATH."
         exit
     fi
-    asm6f -l -c -n patch.asm patch.nes
+    asm6f -l -c -n -i patch.asm
     
     #exit
-    if ! [ -f patch.nes ]
+    if ! [ -f patch.ips ]
     then
         echo
-        echo "Failed to create patch.nes"
+        echo "Failed to create patch.ips"
         exit
     fi
     echo
     
-    # create ips patch
+    # apply ips patch
     chmod a+x flips/flips-linux
-    flips/flips-linux --create base.nes patch.nes patch.ips
-    if ! [ -f "patch.ips" ]
+    flips/flips-linux --apply patch.ips $BASE patch.nes
+    if ! [ -f "patch.nes" ]
     then
-        echo "flips patch generation failed."
+        echo "Failed to apply the patch."
         exit
     fi
     echo "patch generated."
@@ -42,5 +43,5 @@ then
     fi
     echo
 else
-    echo "Must supply base.nes"
+    echo "Must supply base nes file $BASE"
 fi
