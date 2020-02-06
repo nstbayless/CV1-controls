@@ -3,7 +3,7 @@ working.nes
 edit.nes
 patch.nes
 patch.ips
-patch.lst
+*.lst
 *.cdl
 *.bin
 *.o
@@ -13,5 +13,6 @@ patch.lst
 disasm.a65
 patch.map
 patch.*.nl
-patch.*.deb
 export
+*.dis
+*.deb
