@@ -4,15 +4,10 @@ You require a [special build of asm6f](https://github.com/nstbayless/asm6f) whic
 
 Optionally, put [ipsnect](https://github.com/nstbayless/ipsnect) on the path to generate a patch map.
 
-Finally, place your ROM into this directory and call it `base.nes`.
+Finally, place your ROM into this directory and call it `base.nes`. You can also
+add `base-prg0.nes`, `base-prg1.nes`, `base-uc.nes`, and `base-thr.nes` (for PRG0,
+    PRG1, Ultimate CV, and The Holy Relics respectively).
 
-Then run `./build.sh`. `patch.nes` and `patch.ips` will be generated.
+Then run `./build.sh`. You should see several files generated, including .ips and .nes.
 
 Do not commit any .nes files to the repo which are not in the public domain!
-
-### ROM details
-
-No-Intro Name: Castlevania (USA)
-(No-Intro version  20130731-235630)
-File SHA-1: A31B8BD5B370A9103343C866F3C2B2998E889341
-ROM SHA-1: EE09B857C90916EDD92A20C463485A610B0A76FD

@@ -1,2 +1,0 @@
-ASM hacking by NaOH.
-Thanks to revility for input.

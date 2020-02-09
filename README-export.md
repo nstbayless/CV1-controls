@@ -1,16 +1,10 @@
 # Castlevania Improved Controls
 
-![Simon can now change direction in mid-air](screenshots/air-control.gif)
-
 This hack for Castlevania modernizes the control scheme to make it more
 like Symphony of the Night and Mega Man, allowing the player more
 control while in the air.
 
 Compatability with [Ultimate Castlevania](https://www.romhacking.net/hacks/3736/) and with [The Holy Relics](https://www.romhacking.net/hacks/3759/) is confirmed.
-
-## Using or Contributing to This Repository
-
-[Read instructions here.](./SETUP.md)
 
 ## Complete changelog
 
@@ -19,6 +13,14 @@ Compatability with [Ultimate Castlevania](https://www.romhacking.net/hacks/3736/
 - After being knocked back, the player regains control after a split second and can angle their fall.
 - When walking off an edge, the player retains control instead of dropping straight down.
 - The player can jump off of stairs at any point in the climb (however, it is still impossible to land on stairs, so be careful jumping from long flights of stairs over pits)
+
+## Credits
+
+ASM hacking by NaOH.
+
+Thanks to revility for input.
+
+`fceux` and `asm6f` were the tools used.
 
 ## ROM information
 
