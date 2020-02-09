@@ -16,11 +16,11 @@ Compatability with [Ultimate Castlevania](https://www.romhacking.net/hacks/3736/
 
 ## Credits
 
-ASM hacking by NaOH.
+ASM hacking: NaOH.
 
-Thanks to revility for input.
+Tools: `fceux` and `asm6f`.
 
-`fceux` and `asm6f` were the tools used.
+Special thanks to revility and OmegaJP for input.
 
 ## ROM information
 
