@@ -1,4 +1,8 @@
-INCNES "base.nes"
+ifdef USEBASE
+    INCLUDE "opt-base.asm"
+else
+    INCNES "base.nes"
+endif
 
 CLEARPATCH
 
@@ -26,6 +30,20 @@ FROM EQU SKIPTO
 MACRO BANK bank
     SEEK (bank * $4000) + $10
 ENDM
+
+ifdef PRG0
+    INCLUDE "opt-prg0.asm"
+else
+    ifdef PRG1
+        INCLUDE "opt-prg1.asm"
+    else
+        ifdef UC
+            INCLUDE "opt-uc.asm"
+        else
+            INCLUDE "opt-standard.asm"
+        endif
+    endif
+endif
 
 ; ------------------------------------------------------------------------------
 ; memory address values
@@ -178,7 +196,9 @@ FROM $970b
 
 ; --------------------------------------
 ; location of some unused space.
-FROM $BA3C
+FROM BANK6_OFFSET
+FILLVALUE $FF
+COMPARE
 
 custom_handle_jump:
     JSR can_control
@@ -318,6 +338,8 @@ control_handle_stair:
     LDA #$01
     STA player_state_a
     JMP player_air_code
+
+ENDCOMPARE
 
 ; ------------------------------------
 ; definitions of some existing addresses

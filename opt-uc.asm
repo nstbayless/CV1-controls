@@ -1,0 +1,1 @@
+BANK6_OFFSET = $B11F

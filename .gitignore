@@ -16,3 +16,7 @@ patch.*.nl
 export
 *.dis
 *.deb
+*.nl
+*.ips
+*.map
+*.nes

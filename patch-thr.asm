@@ -1,5 +1,9 @@
 ; The Holy Relics-compatible hack.
-INCNES "base.nes"
+ifdef USEBASE
+    INCLUDE "opt-base.asm"
+else
+    INCNES "base.nes"
+endif
 
 CLEARPATCH
 

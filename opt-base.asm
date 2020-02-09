@@ -1,0 +1,1 @@
+INCNES "base-thr.nes"

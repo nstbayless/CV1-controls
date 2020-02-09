@@ -1,47 +1,74 @@
 # note: asm6f must be on the PATH.
-BASE=base.nes
-if [ -f "$BASE" ]
-then
-    chmod a-w $BASE
-    which asm6f > /dev/null
-    if [ $? != 0 ]
+bases=(base.nes base-prg0.nes base-prg1.nes base-uc.nes base-thr.nes)
+srcs=(patch.asm patch.asm patch.asm patch.asm patch-thr.asm)
+configs=(STANDARD PRG0 PRG1 UC THR)
+outs=(cv1-controls cv1-prg0-controls cv1-prg1-controls cv1-uc-controls cv1-thr-controls)
+
+for i in 0 1 2 3 4
+do
+    BASE="${bases[$i]}"
+    CONFIG="${configs[$i]}"
+    SRC="${srcs[$i]}"
+    OUT="${outs[$i]}"
+
+    echo "generating patch #$i"
+
+    if [ -f "$BASE" ]
     then
-        echo "asm6f is not on the PATH."
-        exit
-    fi
-    asm6f -l -c -n -i patch.asm
-    
-    #exit
-    if ! [ -f patch.ips ]
-    then
+        chmod a-w "$BASE"
+        echo "INCNES \"$BASE\"" > opt-base.asm
+        which asm6f > /dev/null
+        if [ $? != 0 ]
+        then
+            echo "asm6f is not on the PATH."
+            exit
+        fi
+        printf 'base size 0x%x\n' `stat --printf="%s" "$BASE"`
+        asm6f -c -n -i "-d$CONFIG" "-dUSEBASE" "$SRC" "$OUT.nes"
+        printf 'out size 0x%x\n' `stat --printf="%s" "$OUT.nes"`
+        
+        if [ $? != 0 ]
+        then
+            exit
+        fi
+        
+        #exit
+        if ! [ -f patch.ips ]
+        then
+            echo
+            echo "Failed to create patch.ips"
+            exit
+        fi
         echo
-        echo "Failed to create patch.ips"
-        exit
-    fi
-    echo
-    
-    # apply ips patch
-    chmod a+x flips/flips-linux
-    flips/flips-linux --apply patch.ips $BASE patch.nes
-    if ! [ -f "patch.nes" ]
-    then
-        echo "Failed to apply the patch."
-        exit
-    fi
-    echo "patch generated."
-    
-    # ipsnect map
-    echo
-    ipsnect patch.ips > patch.map
-    if [ $? != 0 ]
-    then
+        
+        # apply ips patch
+        chmod a+x flips/flips-linux
+        rm patch.nes 2>&1 > /dev/null
+        flips/flips-linux --apply "$OUT.ips" "$BASE" patch.nes
+        if ! [ -f "patch.nes" ]
+        then
+            echo "Failed to apply patch $i."
+            exit
+        fi
+        echo "patch generated."
+        
+        cmp "$OUT.nes" patch.nes
+        if [ $? != 0 ]
+        then
+            exit
+        fi
+        
+        # ipsnect map
         echo
-        echo
-        echo "ipsnect failed. (Is ipsnect on the PATH?)"
-        echo "(this step is optional anyway.)"
-        exit
+        ipsnect "$OUT.ips" "$BASE" > "$OUT.map"
+        if [ $? != 0 ]
+        then
+            echo
+            echo
+            echo "ipsnect failed. (Is ipsnect on the PATH?)"
+            echo "(this step is optional anyway.)"
+        fi
+    else
+        echo "Must supply base nes file $BASE"
     fi
-    echo
-else
-    echo "Must supply base nes file $BASE"
-fi
+done
