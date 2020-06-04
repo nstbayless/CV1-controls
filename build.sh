@@ -11,7 +11,8 @@ do
     SRC="${srcs[$i]}"
     OUT="${outs[$i]}"
 
-    echo "generating patch #$i from $BASE."
+    echo "------------------------------------------"
+    echo "generating patch #$i ($OUT) from $BASE."
 
     if [ -f "$BASE" ]
     then
@@ -51,6 +52,7 @@ do
             continue
         fi
         echo "patch generated."
+        md5sum "${OUT}.nes"
         
         cmp "$OUT.nes" patch.nes
         if [ $? != 0 ]
@@ -73,6 +75,7 @@ do
     fi
 done
 
+echo "============================================"
 echo "Assembling export."
 
 export="cv1-controls"
