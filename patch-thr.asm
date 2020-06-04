@@ -143,82 +143,6 @@ vspeed_map: db 0
 ENDE
 
 ; ------------------------------------------------------------------------------
-BANK 6
-BASE $8000
-
-; player jump table; replace stair jump routine.
-FROM $9374
-
-    dw custom_stair_launchpad
-
-; --------------------------------------
-; inside player's falling routine.
-FROM $93ca
-
-fall_routine_in:
-    bank4_jump custom_handle_cliff_drop
-custom_stair_launchpad:
-    bank4_jump custom_handle_stair
-custom_fall_return:
-    SUPPRESS
-        db 0
-    ENDSUPPRESS
-
-if $ != $93d8
-    ERROR "incorrect length for falling patch."
-endif
-
-; start of player's jump routine
-FROM $9482
-
-    LDA #>custom_handle_jump
-    LDX #<custom_handle_jump-1
-bank4_pre_switch_jmp:
-    PHA
-    TXA
-    PHA
-    LDY #$4
-    JMP bank_switch_jmp
-
-custom_jump_return:
-    SUPPRESS
-        db 0
-    ENDSUPPRESS
-
-; macro to jump to a particular address in bank4
-MACRO bank4_jump address
-    LDA #>address
-    LDX #<address-1
-    JMP bank4_pre_switch_jmp
-ENDM
-    
-if $ != $948E
-    ERROR "incorrect length for aerial patch."
-endif
-
-; --------------------------------------
-; Originally this code calculated which direction
-; player should move in while being knocked back.
-; Now it jumps to a subroutine below.
-FROM $970b
-
-knockback_direction:
-    bank4_jump custom_knockback
-knockback_nops:
-    NOP
-    NOP
-    NOP
-
-custom_knockback_return:
-    SUPPRESS
-        db 0
-    ENDSUPPRESS
-    
-if $ != $9715
-    ERROR "incorrect length for knockback patch."
-endif
-
-; ------------------------------------------------------------------------------
 BANK 4
 BASE $8000
 
@@ -442,6 +366,80 @@ bank6_switch_call:
 
 if $ > $BB20
     ERROR "exceeded space for bank-4 patch."
+endif
+
+; ------------------------------------------------------------------------------
+BANK 6
+BASE $8000
+
+; player jump table; replace stair jump routine.
+FROM $9374
+
+    dw custom_stair_launchpad
+
+; --------------------------------------
+; inside player's falling routine.
+FROM $93ca
+
+fall_routine_in:
+    LDA #>custom_handle_cliff_drop
+    LDX #<custom_handle_cliff_drop-1
+    JMP bank4_pre_switch_jmp
+custom_stair_launchpad:
+    LDA #>custom_handle_stair
+    LDX #<custom_handle_stair-1
+    JMP bank4_pre_switch_jmp
+custom_fall_return:
+    SUPPRESS
+        db 0
+    ENDSUPPRESS
+
+if $ != $93d8
+    ERROR "incorrect length for falling patch."
+endif
+
+; start of player's jump routine
+FROM $9482
+
+    LDA #>custom_handle_jump
+    LDX #<custom_handle_jump-1
+bank4_pre_switch_jmp:
+    PHA
+    TXA
+    PHA
+    LDY #$4
+    JMP bank_switch_jmp
+
+custom_jump_return:
+    SUPPRESS
+        db 0
+    ENDSUPPRESS
+    
+if $ != $948E
+    ERROR "incorrect length for aerial patch."
+endif
+
+; --------------------------------------
+; Originally this code calculated which direction
+; player should move in while being knocked back.
+; Now it jumps to a subroutine below.
+FROM $970b
+
+knockback_direction:
+    LDA #>custom_knockback
+    LDX #<custom_knockback-1
+    JMP bank4_pre_switch_jmp
+    NOP
+    NOP
+    NOP
+
+custom_knockback_return:
+    SUPPRESS
+        db 0
+    ENDSUPPRESS
+    
+if $ != $9715
+    ERROR "incorrect length for knockback patch."
 endif
 
 ; ------------------------------------
