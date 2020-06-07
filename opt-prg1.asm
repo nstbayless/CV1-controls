@@ -1,3 +1,2 @@
 BANK6_OFFSET = $BA3D
-CHECK_STAIRS_ENABLED=1
 stage_stairs_base=$FBEC

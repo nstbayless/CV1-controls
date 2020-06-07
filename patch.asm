@@ -105,6 +105,8 @@ check_reset_facing:
     BEQ check_v_cancel
     STY player_facing
 check_v_cancel:
+
+IFNDEF NO_VCANCEL
     LDA button_down
     AND #$80
     BNE check_stair_catch
@@ -116,16 +118,29 @@ check_v_cancel:
     JSR v_cancel
     LDA #$17
     STA player_v_animation_counter
+ENDIF
     
 check_stair_catch:
 
+IFDEF CHECK_STAIRS_ENABLED
+
+    ; pass through stairs when rising.
     LDA player_vspeed_direction
     BEQ jmp_to_returna
+
+    IFDEF CATCH_STAIRS
+        ; fall through if holding down
+        LDA button_down
+        AND #$04
+        BNE jmp_to_returna
+    ENDIF
     
-    ; fall through if holding down
-    LDA button_down
-    AND #$04
-    BNE jmp_to_returna
+    IFDEF LATCH_STAIRS
+        ; fall through unless holding up
+        LDA button_down
+        AND #$08
+        BEQ jmp_to_returna
+    ENDIF
     
     ; zero store.
     LDA #$0
@@ -134,7 +149,6 @@ check_stair_catch:
     STA varTL
     STA varTR
 
-if CHECK_STAIRS_ENABLED
     ; 
     LDA current_stage
     ASL
@@ -301,6 +315,12 @@ if CHECK_STAIRS_ENABLED
         ; next loop (BNE guaranteed.)
         BNE jmp_stair_loop_begin
     
+IFDEF SECONDARY_BANK6_OFFSET
+    ; guaranteed jump
+    JMP check_loop_end
+    FROM SECONDARY_BANK6_OFFSET
+ENDIF
+    
 check_loop_end:
     ; ~~ check if any varBL,X set and marked as catching ~~
     LDX #$0
@@ -383,13 +403,13 @@ check_loop_end:
         INX
         CPX #$4
         BNE check_loop_start
-endif
+ENDIF
         
 RETURNA:
     ; return to original code
     JMP player_air_code
 
-if CHECK_STAIRS_ENABLED
+IFDEF CHECK_STAIRS_ENABLED
     ; sets varY to -varY if varW is 0 or 3.
     diag_flip:
         LDA varW
@@ -436,13 +456,16 @@ if CHECK_STAIRS_ENABLED
     sec_rts:
         SEC
         RTS
-endif
+ENDIF
     
 ; ------------------------------------
+IFNDEF NO_VCANCEL
 v_cancel:
     LDA #$01
     STA player_vspeed_direction
     LDA #$A2
+ENDIF
+
 store_vspeed_magnitude:
     STA player_vspeed_magnitude
     RTS
