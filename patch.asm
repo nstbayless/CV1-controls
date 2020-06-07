@@ -236,7 +236,8 @@ if CHECK_STAIRS_ENABLED
         
         ; check that 0 <= dy-dx < epsilon
         LDA varOD
-        CMP #$8 ; epsilon; come back to this later.
+        epsilon=#$8
+        CMP epsilon ; epsilon; come back to this later.
         BCS stair_loop_begin ;  y-x > epsilon
         
         ; ~~ check for other intercepting stairs ~~
@@ -310,15 +311,39 @@ check_loop_end:
         ; found a successful match -- This is the butterzone.
         ; (a true stair collision)
         
+        ; modify player y to be exactly on stair.
+        SEC 
+        
+        LDY player_x
+        TXA
+        AND #$1
+        ; (temporarily set to JMP for debug purposes)
+        BNE skip_neg_x
+        
+        ; swap x (calc 0x10 - x)
         SEC
-        LDA player_y
-        ; SBC varOD
+        LDA #$10
+        SBC player_x
+        TAY
         
-        ; TODO: offset Y here to be exactly on stair
-        ; TODO: set stair direction somehow
+        skip_neg_x:
+        TYA
+        SEC
+        SBC player_y
         
+        ; A now holds player_x-player_y
+        AND #$f
+        ; A now holds (player_x-player_y) % 16
+        BEQ skip_mody
+        SEC
+        SBC #$10
+        
+        ; subtract from player_y
+        CLC
+        ADC player_y
         STA player_y
         
+        skip_mody:
         ; set on stair
         LDA #$1
         STA player_on_stairs
@@ -330,6 +355,9 @@ check_loop_end:
         STA player_vspeed_magnitude
         LDA #$0
         STA player_vspeed_direction
+        
+        ; guaranteed BEQ
+        BEQ RETURNA
         
     check_loop_next:
         INX
