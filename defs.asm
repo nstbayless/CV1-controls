@@ -138,6 +138,7 @@ vspeed_map: db 0
 
 ; stage_stairs_base
 
+; general-use variables
 BASE $E
 varE: db 0
 
@@ -148,8 +149,11 @@ varY: db 2
 varW: db 3
 
 BASE $10
-varOZ: db 0
-varOX: db 0
+varBL: db 0
+varBR: db 0
+varTR: db 0
+varTL: db 0
 varYY: db 0
+varOD: db 0
 
 ENDE

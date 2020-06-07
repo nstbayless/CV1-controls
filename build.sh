@@ -26,6 +26,12 @@ do
         fi
         printf 'base size 0x%x\n' `stat --printf="%s" "$BASE"`
         asm6f -c -n -i "-d$CONFIG" "-dUSEBASE" "$SRC" "$OUT.nes"
+        
+        if [ $? != 0 ]
+        then
+            exit
+        fi
+        
         printf 'out size 0x%x\n' `stat --printf="%s" "$OUT.nes"`
         
         if [ $? != 0 ]
