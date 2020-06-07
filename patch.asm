@@ -122,6 +122,11 @@ check_stair_catch:
     LDA player_vspeed_direction
     BEQ jmp_to_returna
     
+    ; fall through if holding down
+    LDA button_down
+    AND #$04
+    BNE jmp_to_returna
+    
     ; zero store.
     LDA #$0
     STA varBL
@@ -237,7 +242,7 @@ if CHECK_STAIRS_ENABLED
         ; check that 0 <= dy-dx < epsilon
         LDA varOD
         epsilon=#$8
-        CMP epsilon ; epsilon; come back to this later.
+        CMP #epsilon ; epsilon; come back to this later.
         BCS stair_loop_begin ;  y-x > epsilon
         
         ; ~~ check for other intercepting stairs ~~
@@ -360,6 +365,7 @@ check_loop_end:
         INX
         STX player_state_b
         
+        skip_set_state_b:
         ; set on stair
         LDA #$1
         STA player_on_stairs
@@ -523,6 +529,19 @@ control_handle_stair:
     LDA player_state_atk
     BNE jump_to_stairs
     JSR begin_jump
+    
+    ; check if down is held, fall through
+    LDA button_down
+    AND #$04
+    BEQ control_handle_stair_nofall
+    
+    ; fall through
+    LDA #$A0
+    STA player_vspeed_magnitude
+    LDA #$1
+    STA player_vspeed_direction
+    
+control_handle_stair_nofall:
     LDA #$01
     STA player_state_a
     JMP player_air_code

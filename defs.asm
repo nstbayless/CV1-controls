@@ -111,7 +111,16 @@ player_hp: db 0
 BASE $18
 game_mode: db 0
 
-; buttons pressed this frame
+; ---- input ----
+; 80: jump
+; 40: whip
+; 20: Select
+; 10: Start
+; 08: Up
+; 04: Down
+; 02: Left
+; 01: Right
+; buttons (just now) pressed this frame
 BASE $F5
 button_press: db 0
 
