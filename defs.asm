@@ -2,6 +2,20 @@
 ; memory address values
 ENUM $0
 
+BASE $28
+current_stage: db 0
+
+; either 0 or 1
+BASE $46
+current_substage: db 0
+
+BASE $3F
+player_y: db 0
+
+; little-endian x value in section.
+BASE $40
+player_x: dw 0
+
 ; FF: right
 ; 00: stopped
 ; 01: left
@@ -50,6 +64,9 @@ player_v_animation_counter: db 0
 ; 9: stunned
 BASE $46C
 player_state_a: db 0
+
+BASE $3E
+player_on_stairs: db 0
 
 ; attack state
 ; 00: not attacking
@@ -105,5 +122,34 @@ time_remaining_b: db 0
 
 BASE $04F8
 vspeed_map: db 0
+
+; array of word pointers to stage stair data offset
+; stair data: 0-terminated list.
+; stair (2 bytes; 1 byte if 0):
+; low byte:
+;   - if 0, EOL
+;   - bytes 0-1: direction
+;   - byte 2: substage
+;   - byte 3: ?
+;   - bytes 4-7: y position + 16
+; high byte:
+;   - bytes 3-7: x position
+;   - bytes 0-2: screen x
+
+; stage_stairs_base
+
+BASE $E
+varE: db 0
+
+BASE $0
+varZ: db 0
+varX: db 1
+varY: db 2
+varW: db 3
+
+BASE $10
+varOZ: db 0
+varOX: db 0
+varYY: db 0
 
 ENDE

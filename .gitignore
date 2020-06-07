@@ -22,3 +22,4 @@ export
 *.nes
 *.zip
 cv1-controls/
+*watch.txt
