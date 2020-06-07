@@ -65,6 +65,9 @@ player_v_animation_counter: db 0
 BASE $46C
 player_state_a: db 0
 
+BASE $4c0
+player_stair_direction: db 0
+
 BASE $3E
 player_on_stairs: db 0
 

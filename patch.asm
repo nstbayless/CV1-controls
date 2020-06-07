@@ -308,8 +308,12 @@ check_loop_end:
         AND #$2 ; was this one marked catching?
         BEQ check_loop_next
         
+    stair_check_butterzone:
         ; found a successful match -- This is the butterzone.
         ; (a true stair collision)
+        
+        ; set stair direction
+        STX player_stair_direction
         
         ; modify player y to be exactly on stair.
         SEC 
@@ -342,8 +346,20 @@ check_loop_end:
         CLC
         ADC player_y
         STA player_y
-        
         skip_mody:
+        
+        ; set vertical direction for stairs
+        TXA
+        ASL
+        CLC
+        ADC player_facing
+        STA player_vspeed_direction
+        
+        ; have to set walking on x (player_state_b) to avoid getting stuck.
+        LDX player_facing
+        INX
+        STX player_state_b
+        
         ; set on stair
         LDA #$1
         STA player_on_stairs
@@ -353,11 +369,9 @@ check_loop_end:
         ; zero hspeed
         LDA #$A2
         STA player_vspeed_magnitude
-        LDA #$0
-        STA player_vspeed_direction
         
-        ; guaranteed BEQ
-        BEQ RETURNA
+        ; guaranteed jump
+        BNE RETURNA
         
     check_loop_next:
         INX
