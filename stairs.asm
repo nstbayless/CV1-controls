@@ -18,6 +18,26 @@ IFDEF CHECK_STAIRS_ENABLED
         BEQ jmp_to_air_standard
     ENDIF
     
+    IFDEF STAIR_STACK_VARIABLES
+        ; put some memory on the stack so it can be used
+        ; for variables in this function.
+        LDX #$4
+        LDA $0,X
+        PHA
+        INX
+      - CPX #$B
+        BNE -
+        
+        ; use these addresses for the vars instead.
+        varE=$4
+        varF=$5
+        varW=$6
+        varZ=$7
+        varX=$8
+        varY=$9
+        varYY=$a
+    ENDIF
+    
     ; zero store.
     LDA #$0
     TAX
@@ -53,7 +73,7 @@ IFDEF CHECK_STAIRS_ENABLED
             LDA (varE),Y
         ENDIF
         BNE check_substage
-        JMP check_loop_end
+        JMP stair_loop_end
     
     check_substage:
         TAX
@@ -223,21 +243,32 @@ IFDEF CHECK_STAIRS_ENABLED
     
 IFDEF SECONDARY_BANK6_OFFSET
     ; guaranteed jump
-    JMP check_loop_end
+    JMP stair_loop_end
     FROM SECONDARY_BANK6_OFFSET
 ENDIF
     
-check_loop_end:
+stair_loop_end:
+
+    IFDEF STAIR_STACK_VARIABLES
+        ; put variables on stack back into memory
+        LDX #$4
+        PLA
+        STA $0,X
+        INX
+      - CPX #$B
+        BNE -
+    ENDIF
+
     ; ~~ check if any varBL,X set and marked as catching ~~
     LDX #$0
-    check_loop_start:
+    mincheck_loop_start:
         LDA varBL,X
         TAY
         AND #$1 ; was this one set?
-        BEQ check_loop_next
+        BEQ mincheck_loop_next
         TYA
         AND #$2 ; was this one marked catching?
-        BEQ check_loop_next
+        BEQ mincheck_loop_next
         
     stair_check_butterzone:
         ; found a successful match -- This is the butterzone.
@@ -305,8 +336,8 @@ check_loop_end:
         ; guaranteed jump
         BNE air_standard
         
-    check_loop_next:
+    mincheck_loop_next:
         INX
         CPX #$4
-        BNE check_loop_start
+        BNE mincheck_loop_start
 ENDIF

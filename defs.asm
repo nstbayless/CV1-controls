@@ -151,22 +151,26 @@ vspeed_map: db 0
 ; stage_stairs_base
 
 ; general-use variables
-BASE $E
-varE: db 0
+; the names are completely meaningless; historically they had meaning
+; but the addresses have moved. Only varBL...varTL make sense in the context
+; of stair logic. (bottom-left, etc.)
 
 BASE $0
-varZ: db 0
-varX: db 1
-varY: db 2
-varW: db 3
-
-BASE $10
 varBL: db 0
 varBR: db 0
 varTR: db 0
 varTL: db 0
-varYY: db 0
-varOD: db 0
-varOE: db 0
+
+varE=$E
+varF=$F
+
+varW=$10
+varZ=$11
+varX=$12
+varY=$13
+varYY=$14
+varOD=$15
+varOE=$16
+varOF=$17
 
 ENDE
