@@ -3,6 +3,8 @@ INCLUDE "pre.asm"
 
 INCLUDE "defs.asm"
 
+stage_stairs_base=$FBF3
+
 ; ------------------------------------------------------------------------------
 BANK 4
 BASE $8000
@@ -13,6 +15,41 @@ FROM $B410
 ; check that we only overwrite the value $FF
 FILLVALUE $FF
 COMPARE
+
+IFDEF CHECK_STAIRS_ENABLED
+    INCLUDE "stairs_helper.asm"
+
+    load_stair_begin:
+        LDA current_stage
+        ASL
+        STA varE
+        LDY #>load_stair_begin_b6
+        LDX #<load_stair_begin_b6
+        JSR bank6_switch_call
+        JMP bankswitch_fix
+    
+    jmp_to_air_standard:
+        JMP air_standard
+    
+    load_stair_data:
+        ; we want to load (varE),Y but in bank6 instead of bank4.
+        STY varOD
+        LDY #>load_stair_data_b6
+        LDX #<load_stair_data_b6
+        JSR bank6_switch_call
+        LDY varOD
+ENDIF
+
+bankswitch_fix:
+    ; some pre-existing code later seems to rely on this being 6.
+    INC $27
+    INC $27
+    ORA #$0 ; just to refresh status flags for A.
+    RTS
+
+check_stair_catch:
+
+    INCLUDE "stairs.asm"
 
 ; code complies with original
 air_standard:
@@ -59,24 +96,38 @@ check_reset_facing:
     BEQ check_v_cancel
     STY player_facing
 check_v_cancel:
+IFNDEF NO_VCANCEL
     LDA button_down
     AND #$80
-    BNE air_standard
+    BNE jmp_to_check_stair_catch
     LDA player_vspeed_direction
-    BNE air_standard
+    BNE jmp_to_check_stair_catch
     LDA player_vspeed_magnitude
     CMP #$95
-    BMI air_standard
+    BMI jmp_to_check_stair_catch
     JSR v_cancel
     LDA #$17
     STA player_v_animation_counter
-    BNE air_standard
+    
+IFDEF CHECK_STAIRS_ENABLED
+jmp_to_check_stair_catch:
+    JMP check_stair_catch
+ELSE
+    ; guaranteed branch
+    BNE jmp_to_check_stair_catch
+    jmp_to_check_stair_catch=air_standard
+ENDIF
     
 ; ------------------------------------
 v_cancel:
     LDA #$01
     STA player_vspeed_direction
     LDA #$A2
+    ; proceed to store_vspeed_magnitude
+ELSE
+    JMP check_stair_catch
+ENDIF
+
 store_vspeed_magnitude:
     STA player_vspeed_magnitude
     RTS
@@ -105,8 +156,12 @@ custom_knockback:
     BEQ RETURNB
     CMP #$03
     BNE RETURNB
-    LDA $00
 RETURNB:
+    ; jump to unknown subroutine
+    LDY #>$9A5B
+    LDX #<$9A5B
+    JSR bank6_switch_call
+    JSR bankswitch_fix
     LDY #>custom_knockback_return
     LDX #<custom_knockback_return
     JMP bank6_switch_jmp
@@ -118,6 +173,8 @@ knockback_standard:
     ADC #$01
     EOR #$03
     STA $00
+    
+    ; return to knockback code.
     JMP RETURNB
     
 ; ------------------------------------
@@ -142,6 +199,20 @@ control_handle_stair:
     LDY #>begin_jump
     LDX #<begin_jump
     JSR bank6_switch_call
+    JSR bankswitch_fix
+    
+    ; check if down is held, fall through
+    LDA button_down
+    AND #$04
+    BEQ control_handle_stair_nofall
+    
+    ; fall through
+    LDA #$A0
+    STA player_vspeed_magnitude
+    LDA #$1
+    STA player_vspeed_direction
+    
+control_handle_stair_nofall:
     LDA #$01
     STA player_state_a
     LDY #>begin_jump
@@ -182,7 +253,53 @@ custom_handle_cliff_drop:
     LDY #>custom_fall_return
     LDX #<custom_fall_return
     JMP bank6_switch_jmp
+
+IFDEF CHECK_STAIRS_ENABLED
+shell_replacement_b4:
+    LDX #$00
+    STX player_hspeed_1
+    STX $3C ; unknown
+    LDA #$02
+    STA $00
+    LDA player_y
+    CMP #$E0
+    BCS jump_to_97d3
+    LDA $001D
+    BEQ +
+    DEC $001D
+  + LDA $001D
+    LDY #>shell_return
+    LDX #<shell_return
+    JMP bank6_switch_jmp
     
+jump_to_97d3:
+    LDY #>$97d3
+    LDX #<$97d3
+    LDA player_y
+    JMP bank6_switch_jmp_159
+    
+; LDY #>address
+; LDX #<address
+; JMP here
+bank6_switch_jmp_159:
+    STA $159
+    ; decrement return address (YX)
+    INX
+    DEX
+    BNE +
+    DEY
+  + DEX
+    ; put return address (YX) on stack.
+    TYA
+    PHA
+    TXA
+    PHA
+    LDY #$6
+    LDA $159
+    JMP bank_switch_call
+    
+ENDIF
+
 ; LDY #>address
 ; LDX #<address
 ; JMP here
@@ -194,7 +311,7 @@ bank6_switch_jmp:
     BNE +
     DEY
   + DEX
-    ; put return addres (YX) on stack.
+    ; put return address (YX) on stack.
     TYA
     PHA
     TXA
@@ -206,6 +323,7 @@ bank6_switch_jmp:
 ; LDY #>address
 ; LDX #<address
 ; JSR here
+; A is returned.
 bank6_switch_call:
     STA $00
     LDA #>bank_switch_return
@@ -227,7 +345,7 @@ bank6_switch_call:
     STY $27
     LDY #$6
     LDA $00
-    JMP bank_switch_call    
+    JMP bank_switch_call
 
 if $ > $BB20
     ERROR "exceeded space for bank-4 patch."
@@ -296,8 +414,11 @@ knockback_direction:
     LDA #>custom_knockback
     LDX #<custom_knockback-1
     JMP bank4_pre_switch_jmp
-    NOP
-    NOP
+    
+load_stair_data_b6:
+    LDY varOD
+    LDA (varE),Y
+    RTS
     NOP
 
 custom_knockback_return:
@@ -305,9 +426,40 @@ custom_knockback_return:
         db 0
     ENDSUPPRESS
     
-if $ != $9715
+if $ != $9718
     ERROR "incorrect length for knockback patch."
 endif
+
+IFDEF CHECK_STAIRS_ENABLED
+    FROM $97B0
+
+    ; just some code space that we can steal
+    shell_site:
+        LDA #>shell_replacement_b4
+        LDX #<shell_replacement_b4-1
+        JMP bank4_pre_switch_jmp
+
+    load_stair_begin_b6:
+        LDX varE
+        LDA stage_stairs_base,X
+        STA varE
+        LDA stage_stairs_base+1,X
+        STA varE+1
+        RTS
+        NOP
+        NOP
+        NOP
+        NOP
+        
+    shell_return:
+    SUPPRESS
+        db 0
+    ENDSUPPRESS
+
+    if $ != $97C8
+        ERROR "incorrect length for shell site."
+    endif
+ENDIF
 
 ; ------------------------------------
 ; definitions of some existing addresses

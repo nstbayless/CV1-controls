@@ -167,5 +167,6 @@ varTR: db 0
 varTL: db 0
 varYY: db 0
 varOD: db 0
+varOE: db 0
 
 ENDE
