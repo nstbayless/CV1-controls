@@ -20,9 +20,13 @@ Options marked with an asterisk (\*) are optional. See "How to apply" below for 
 ## How to apply
 
 Use an ips patcher, such as flips or Lunar IPS. A variety of .ips files are provided depending on what you want.
-If you're not use what you want, use `prg0/cv1-controls-prg0-catch-vcancel.ips`. These are the options provided:
+If you're not use what you want, you likely want `prg0/cv1-controls-prg0-catch-vcancel.ips` or `prg1/cv1-controls-prg1-catch-vcancel.ips`.
+
+These are the options provided:
 
 ### Base ROM
+
+You can determine whether your ROM is prg0 or prg1 by comparing the hash with the hashes listed at the bottom of this readme.
 
 - prg0: compatible with prg0 ROMs. (This is the most common ROM.)
 - prg1: compatible with prg1 ROMs.
@@ -49,5 +53,28 @@ Special thanks to revility and OmegaJP for input.
 
 ## ROM information
 
-### Standard
+These hashes are for the base roms that cv1-controls can be applied to.
 
+PRG0:
+```
+File SHA-1: A31B8BD5B370A9103343C866F3C2B2998E889341
+ROM SHA-1: EE09B857C90916EDD92A20C463485A610B0A76FD
+```
+
+PRG1:
+```
+File SHA-1: D1A247025B6256D4BF2187B137CF554AFFFFD616
+ROM SHA-1: 1ABB2838CFA0F74510CC818F462B1AD1908D162E
+```
+
+Ultimate CV:
+```
+File SHA-1: 8CDAE6284056949DF993F8AD35C9105CCB7305B6
+ROM SHA-1: A3982C0881E55920928E8B8AA42577E60E54F5B0
+```
+
+THR
+```
+File SHA-1: F7F2AC72C5A5343D81F0959AADC6271EDB824269
+ROM SHA-1: 6387E2C908E63BBA086C9AFE8B5F4E6D9EDE1ED2
+```
