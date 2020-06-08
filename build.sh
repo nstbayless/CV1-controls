@@ -26,6 +26,12 @@ do
     OUT="${outs[$i]}"
     folder="${folders[$i]}"
     
+    if [ ! -f "$SRC" ]
+    then
+        echo "Base ROM $SRC not found -- skipping."
+        continue
+    fi
+    
     mkdir "$export/$folder"
     
     for k in 0 1

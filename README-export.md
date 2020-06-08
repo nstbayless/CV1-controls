@@ -6,6 +6,8 @@ control while in the air.
 
 Compatability with [Ultimate Castlevania](https://www.romhacking.net/hacks/3736/) and with [The Holy Relics](https://www.romhacking.net/hacks/3759/) is confirmed.
 
+Source code available at https://github.com/nstbayless/CV1-controls; 
+
 ## Complete list of changes
 
 Options marked with an asterisk (\*) are optional. See "How to apply" below for more information.
