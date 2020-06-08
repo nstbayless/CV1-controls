@@ -12,13 +12,16 @@ Compatability with [Ultimate Castlevania](https://www.romhacking.net/hacks/3736/
 
 [Read instructions here.](./SETUP.md)
 
-## Complete changelog
+## Complete list of changes
+
+Options marked with an asterisk (\*) are optional changes.
 
 - Enables the player to control their x-velocity in mid-air while jumping (including while jump-attacking).
-- When releasing the jump button, one immediately starts falling again; this allows the player to make smaller hops if desired.
+- (\*) When releasing the jump button, one immediately starts falling again; this allows the player to make smaller hops if desired.
 - After being knocked back, the player regains control after a split second and can angle their fall.
 - When walking off an edge, the player retains control instead of dropping straight down.
-- The player can jump off of stairs at any point in the climb (however, it is still impossible to land on stairs, so be careful jumping from long flights of stairs over pits)
+- The player can jump off of stairs at any point in the climb
+- (\*) The player can land on stairs (either by default or by holding up to latch)
 
 ## ROM information
 
@@ -47,7 +50,7 @@ File SHA-1: 8CDAE6284056949DF993F8AD35C9105CCB7305B6
 ROM SHA-1: A3982C0881E55920928E8B8AA42577E60E54F5B0
 ```
 
-### Ultimate THR
+### The Holy Relics
 
 For `cv1-thr-controls.ips`, which is compatible with The Holy Relics:
 

@@ -44,6 +44,9 @@ IFDEF CHECK_STAIRS_ENABLED
         INY
         INY
         IFDEF load_stair_data
+            ; retrieves stair data
+            ; high byte in varOE
+            ; low byte in A
             JSR load_stair_data
         ELSE
             ; load stair data low-byte
@@ -92,7 +95,8 @@ IFDEF CHECK_STAIRS_ENABLED
         ; store x value of stair
         INY
         IFDEF load_stair_data
-            JSR load_stair_data
+            ; load stair data high-byte
+            LDA varOE
         ELSE
             ; load stair data high-byte
             LDA (varE),Y

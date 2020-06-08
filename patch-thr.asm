@@ -33,11 +33,13 @@ IFDEF CHECK_STAIRS_ENABLED
     
     load_stair_data:
         ; we want to load (varE),Y but in bank6 instead of bank4.
+        INY
         STY varOD
         LDY #>load_stair_data_b6
         LDX #<load_stair_data_b6
         JSR bank6_switch_call
         LDY varOD
+        DEY
 ENDIF
 
 bankswitch_fix:
@@ -268,6 +270,14 @@ shell_replacement_b4:
     BEQ +
     DEC $001D
   + LDA $001D
+    LSR
+    LSR
+    LSR
+    LSR
+    AND #$01
+    STA $00
+    CLC
+    ADC #$98
     LDY #>shell_return
     LDX #<shell_return
     JMP bank6_switch_jmp
@@ -415,7 +425,7 @@ knockback_direction:
     LDX #<custom_knockback-1
     JMP bank4_pre_switch_jmp
     
-load_stair_data_b6:
+load_stair_data_b6_unused:
     LDY varOD
     LDA (varE),Y
     RTS
@@ -446,6 +456,14 @@ IFDEF CHECK_STAIRS_ENABLED
         LDA stage_stairs_base+1,X
         STA varE+1
         RTS
+    load_stair_data_b6:
+        LDY varOD
+        LDA (varE),Y
+        STA varOE
+        DEY
+        LDA (varE),Y
+        RTS
+        NOP
         NOP
         NOP
         NOP
@@ -456,7 +474,7 @@ IFDEF CHECK_STAIRS_ENABLED
         db 0
     ENDSUPPRESS
 
-    if $ != $97C8
+    if $ != $97D3
         ERROR "incorrect length for shell site."
     endif
 ENDIF
