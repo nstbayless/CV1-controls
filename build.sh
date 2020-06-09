@@ -3,7 +3,7 @@ bases=(base-prg0.nes base-prg1.nes base-uc.nes base-thr.nes)
 srcs=(patch.asm patch.asm patch.asm patch-thr.asm)
 configs=(PRG0 PRG1 UC THR)
 outs=(cv1-controls-prg0 cv1-controls-prg1 cv1-controls-uc cv1-controls-thr)
-folders=("prg0" "prg1" "uc" "thr")
+folders=("prg0" "prg1" "ultimate-cv" "the-holy-relics")
 
 # FALLTHROUGH_STAIRS is default behaviour, so the asm actually ignores it.
 stair_style_defs=("FALLTHROUGH_STAIRS" "LATCH_STAIRS" "CATCH_STAIRS")

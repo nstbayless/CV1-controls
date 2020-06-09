@@ -30,15 +30,16 @@ varOD=varE ; reusing/clobbering varE
 ; stair transfer buffer
 stair_data_buffer=$10
 ; size of stair transfer buffer
-; must be a power of two.
-DATA_TANSFER_N=#$8
+DATA_TANSFER_N=$A
 
-SPECIAL_STAIRCASE_THR_WOODS=1
+SPECIAL_STAIRCASES_THR=1
+SPECIAL_STAIRCASE_THR_CRYPT=1
 
 IFDEF CHECK_STAIRS_ENABLED
     INCLUDE "stairs_helper.asm"
     
     replenish_stair_data_buffer:
+        ; Y % DATA_TANSFER_N == 0
         ; store Y on stack
         TYA
         PHA
@@ -47,11 +48,11 @@ IFDEF CHECK_STAIRS_ENABLED
         CLC
         ADC #DATA_TANSFER_N-1
         STA varF
-        
+        bank4_pre_switch_jmp
         ; load stair data
         LDY #>load_stair_data_b6
         LDX #<load_stair_data_b6
-        JSR bank6_switch_call_E
+        JSR bank6_switch_call
         
         ; some pre-existing code later seems to rely on this being 6.
         ; (inline bankswitch_fix)
@@ -66,13 +67,23 @@ IFDEF CHECK_STAIRS_ENABLED
         LDA stair_data_buffer
         RTS
     
+        
     load_stair_data:
         ; if Y % DATA_TANSFER_N == 0 then we
         ; need to replenish the stair_data_buffer.
         TYA
-        AND #DATA_TANSFER_N-1
+        BEQ replenish_stair_data_buffer
+        BNE load_stair_data_modulo_check
+        
+    load_stair_data_modulo_subtract:
+        SBC #DATA_TANSFER_N
         BEQ replenish_stair_data_buffer
         
+    load_stair_data_modulo_check:
+        CMP #DATA_TANSFER_N
+        BCS load_stair_data_modulo_subtract
+        
+        ; Y % DATA_TANSFER_N != 0
         ; load stair data from buffer
         TAX
         LDA stair_data_buffer,X
@@ -192,11 +203,6 @@ custom_knockback:
     CMP #$03
     BNE RETURNB
 RETURNB:
-    ; jump to unknown subroutine
-    LDY #>$9A5B
-    LDX #<$9A5B
-    JSR bank6_switch_call
-    JSR bankswitch_fix
     LDY #>custom_knockback_return
     LDX #<custom_knockback_return
     JMP bank6_switch_jmp
@@ -344,38 +350,6 @@ bank6_switch_jmp_159:
     LDY #$6
     LDA $159
     JMP bank_switch_call
-    
-; this is exactly like bank6_switch_call below, except 
-; varE is used instead of $0.
-; bank6_switch_call can be switched to use varE instead, obviating
-; the need for two nearly identical functions, if
-; it can be proved that $0 is not needed where it is used.
-; LDY #>address
-; LDX #<address
-; JSR here
-; A is returned.
-bank6_switch_call_E:
-    STA varE
-    LDA #>bank_switch_return
-    PHA
-    LDA #<bank_switch_return-1
-    PHA
-    ; decrement return address (YX)
-    INX
-    DEX
-    BNE +
-    DEY
-  + DEX
-    ; put return addres (YX) on stack.
-    TYA
-    PHA
-    TXA
-    PHA
-    LDY #$4
-    STY $27
-    LDY #$6
-    LDA varE
-    JMP bank_switch_call
 ENDIF
 
 ; LDY #>address
@@ -403,7 +377,7 @@ bank6_switch_jmp:
 ; JSR here
 ; A is returned.
 bank6_switch_call:
-    STA $00
+    STA varE
     LDA #>bank_switch_return
     PHA
     LDA #<bank_switch_return-1
@@ -422,7 +396,7 @@ bank6_switch_call:
     LDY #$4
     STY $27
     LDY #$6
-    LDA $00
+    LDA varE
     JMP bank_switch_call
 
 bankswitch_fix:
@@ -432,7 +406,7 @@ bankswitch_fix:
     ORA #$0 ; just to refresh status flags for A.
     RTS
 
-if $ > $BB20
+if $ > $BB30
     ERROR "exceeded space for bank-4 patch."
 endif
 
@@ -454,11 +428,11 @@ FROM $93ca
 fall_routine_in:
     LDA #>custom_handle_cliff_drop
     LDX #<custom_handle_cliff_drop-1
-    JMP bank4_pre_switch_jmp
+    JMP bank4_pre_switch_jmp_
 custom_stair_launchpad:
     LDA #>custom_handle_stair
     LDX #<custom_handle_stair-1
-    JMP bank4_pre_switch_jmp
+    JMP bank4_pre_switch_jmp_
 custom_fall_return:
     SUPPRESS
         db 0
@@ -473,7 +447,7 @@ FROM $9482
 
     LDA #>custom_handle_jump
     LDX #<custom_handle_jump-1
-bank4_pre_switch_jmp:
+bank4_pre_switch_jmp_:
     PHA
     TXA
     PHA
@@ -498,14 +472,9 @@ FROM $970b
 knockback_direction:
     LDA #>custom_knockback
     LDX #<custom_knockback-1
-    JMP bank4_pre_switch_jmp
-    
-load_stair_data_b6_unused:
-    ; this is not used and should be removed.
-    ; FIXME -- remove this.
-    LDY varOD
-    LDA (varE),Y
-    RTS
+    JMP bank4_pre_switch_jmp_
+    NOP
+    NOP
     NOP
 
 custom_knockback_return:
@@ -513,19 +482,32 @@ custom_knockback_return:
         db 0
     ENDSUPPRESS
     
-if $ != $9718
+if $ != $9715
     ERROR "incorrect length for knockback patch."
 endif
 
 IFDEF CHECK_STAIRS_ENABLED
-    FROM $97B0
+    ; change the y value for exiting stage top
+    FROM $9FFA
+        FILLVALUE #$30
+        COMPARE
+        db #STAIR_EXIT_STAGE_TOP
+        ENDCOMPARE
 
+    FROM $A000
+        FILLVALUE #$CF
+        COMPARE
+        db #STAIR_ENTER_STAGE_BOTTOM
+        ENDCOMPARE
+
+
+    FROM $97B0
     ; just some code space that we can steal.
     ; seems to be related to dying.
     shell_site:
         LDA #>shell_replacement_b4
         LDX #<shell_replacement_b4-1
-        JMP bank4_pre_switch_jmp
+        JMP bank4_pre_switch_jmp_
 
     load_stair_data_b6:
         LDY varF

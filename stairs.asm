@@ -30,6 +30,10 @@ IFDEF CHECK_STAIRS_ENABLED
         PHA
         LDA $6
         PHA
+        LDA stair_data_buffer+$8
+        PHA
+        LDA stair_data_buffer+$9
+        PHA
     ENDIF
     
     ; zero store.
@@ -39,8 +43,8 @@ IFDEF CHECK_STAIRS_ENABLED
     STA varTR
     STA varTL
 
-    ; 
     IFNDEF load_stair_data
+        ; get the stair data array start pointer.
         LDA current_stage
         ASL
         TAX
@@ -60,9 +64,30 @@ IFDEF CHECK_STAIRS_ENABLED
             ; low byte in A
             JSR load_stair_data
         ELSE
+            IFDEF FLOATING_STAIRCASE_STAGE_SEVEN_FIX
+                LDA current_stage
+                CMP #$7
+                BNE pre_load_low_byte
+                LDA current_substage
+                BEQ pre_load_low_byte
+                CPY #$10
+                BMI pre_load_low_byte
+                LDA stage_seven_extradata-$10,Y
+                JMP post_load_low_byte
+            stage_seven_extradata:
+                ; two extra staircases
+                db $74
+                db $C1
+                db $56
+                db $D9
+                db $0
+            ENDIF
+            
+        pre_load_low_byte:
             ; load stair data low-byte
             LDA (varE),Y
         ENDIF
+    post_load_low_byte:
         BNE check_substage
         JMP stair_loop_end
     
@@ -109,9 +134,22 @@ IFDEF CHECK_STAIRS_ENABLED
             ; load stair data high-byte
             JSR load_stair_data
         ELSE
+            IFDEF FLOATING_STAIRCASE_STAGE_SEVEN_FIX
+                LDA current_stage
+                CMP #$7
+                BNE pre_load_high_byte
+                LDA current_substage
+                BEQ pre_load_high_byte
+                CPY #$10
+                BMI pre_load_high_byte
+                LDA stage_seven_extradata-$10,Y
+                JMP post_load_high_byte
+            ENDIF
             ; load stair data high-byte
+            pre_load_high_byte:
             LDA (varE),Y
         ENDIF
+        post_load_high_byte:
         
         TAX ; high byte of stair
         
@@ -167,12 +205,24 @@ IFDEF CHECK_STAIRS_ENABLED
         ; (check high byte)
         LDA varYY
         SBC varX
-        BNE stair_loop_begin_yinc
+        BNE jmp_stair_loop_begin_yinc
         
         ; check that dy-dx < epsilon
         LDA varOD
         CMP #epsilon ; epsilon; come back to this later.
-        BCS stair_loop_begin_yinc ;  y-x >= epsilon
+        BCS jmp_stair_loop_begin_yinc ;  y-x >= epsilon
+        
+        IFDEF SPECIAL_STAIRCASE_THR_CRYPT
+            ; fix for some phantom staircases in The Holy Relics' crypt
+            LDA current_stage
+            CMP #$D
+            BNE skip_crypt_a
+            CPY #$9
+            BEQ jmp_stair_loop_begin_yinc
+            CPY #$3
+            BEQ jmp_stair_loop_begin_yinc
+            skip_crypt_a:
+        ENDIF
         
         ; ~~ check for other intercepting stairs ~~
         ; flip dx to match stair's direction
@@ -212,18 +262,21 @@ IFDEF CHECK_STAIRS_ENABLED
         JMP stair_loop_begin_yinc
         
         stair_negx:
+        
         ; get absolute value of dx, then compress it
         JSR diag_flip_prf_x
         JSR diag_compress_x
+        
+        ; swap direction to horizontally opposite
+        LDA varW
+        EOR #$2
+        STA varW
+        
         JSR diag_compare_x
         BCC jmp_stair_loop_begin_yinc
         
         store_xpos_nset:
         ; (X is varW, set in diag_compare_x)
-        TXA
-        ; swap direction to horizontally opposite
-        EOR #$2
-        TAX
         LDA varZ
         ORA #$1
         STA varBL,X
@@ -240,39 +293,106 @@ stair_loop_end:
     IFDEF STAIR_STACK_VARIABLES
         ; put variables on stack back into memory
         PLA
-        STA $4
+        STA stair_data_buffer+$9
+        PLA
+        STA stair_data_buffer+$8
+        PLA
+        STA $6
         PLA
         STA $5
         PLA
-        STA $6
+        STA $4
     ENDIF
 
     ; ~~ check if any varBL,X set and marked as catching ~~
     LDX #$0
+    
+    IFNDEF SPECIAL_STAIRCASES_THR
+        mincheck_loop_start_bne_intermediate:
+    ENDIF
     mincheck_loop_start:
         LDA varBL,X
         TAY
         AND #$1 ; was this one set?
-        BEQ mincheck_loop_next
+        BEQ mincheck_loop_next_beq_intermediate
         TYA
         AND #$2 ; was this one marked catching?
-        BEQ mincheck_loop_next
+        BEQ mincheck_loop_next_beq_intermediate
         
     stair_check_butterzone:
         ; found a successful match -- This is the butterzone.
         ; (a true stair collision)
         
-        IFDEF SPECIAL_STAIRCASE_THR_WOODS
-            ; there are phantom staircases in the woods
-            ; we have to ignore them.
-            LDA current_stage
-            CMP #$2
-            BNE skip_woods
-            LDA current_substage
-            BEQ skip_woods
-            LDA player_x+1
-            BNE mincheck_loop_end
-            skip_woods:
+        IFDEF SPECIAL_STAIRCASES_THR
+            ; there are phantom staircases The Holy Relics
+            ; we ignore the screens they appear on completely.
+            LDY #$0
+            loop_phantom_stair_begin:
+            ; compare stage
+            LDA thr_staircase_table,Y
+            BEQ loop_phantom_stair_end
+            AND #$1f
+            CMP current_stage
+            BNE loop_phantom_stair_next:
+            ; compare substage
+            LDA thr_staircase_table,Y
+            LSR
+            LSR
+            LSR
+            LSR
+            LSR
+            AND #$1
+            CMP current_substage
+            BNE loop_phantom_stair_next
+            ; compare screen 1
+            LDA thr_staircase_table+1,Y
+            AND #$0f
+            CMP player_x+1
+            BEQ mincheck_loop_end
+            ; compare screen 2
+            LDA thr_staircase_table+1,Y
+            LSR
+            LSR
+            LSR
+            LSR
+            AND #$0f
+            CMP player_x+1
+            BEQ mincheck_loop_end
+            
+            ; next loop
+            loop_phantom_stair_next:
+            INY
+            INY
+            ; guaranteed jump
+            BNE loop_phantom_stair_begin
+            
+            mincheck_loop_next_beq_intermediate:
+            BEQ mincheck_loop_next
+            
+            mincheck_loop_start_bne_intermediate:
+            BNE mincheck_loop_start
+            
+            ; data
+            thr_staircase_table:
+                ; woods staircases
+                db $22
+                db $12
+                ; tower staircase
+                db $25
+                db $00
+                ; river staircases
+                db $0B
+                db $34
+                db $0B
+                db $56
+                ; crypt staircases
+                db $2E
+                db $04
+                db $10
+                db $00
+                ; EOL
+                db $0 
+            loop_phantom_stair_end:
         ENDIF
         
         ; set stair direction
@@ -311,7 +431,7 @@ stair_loop_end:
         ADC player_y
         
         ; if player would end up out of bounds, abort.
-        CMP #$31
+        CMP #STAIR_EXIT_STAGE_TOP+1
         BCC mincheck_loop_end
         CMP #$D0
         BCS mincheck_loop_end
@@ -344,9 +464,12 @@ stair_loop_end:
         ; guaranteed jump
         BNE air_standard
         
+    IFNDEF SPECIAL_STAIRCASES_THR
+        mincheck_loop_next_beq_intermediate:
+    ENDIF
     mincheck_loop_next:
         INX
         CPX #$4
-        BNE mincheck_loop_start
+        BNE mincheck_loop_start_bne_intermediate
     mincheck_loop_end:
 ENDIF

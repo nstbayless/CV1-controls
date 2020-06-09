@@ -65,6 +65,21 @@ FROM $970b
     NOP
     NOP
 
+IFDEF CHECK_STAIRS_ENABLED
+    ; change the y value for exiting stage top
+    FROM $9FFA
+        FILLVALUE #$30
+        COMPARE
+        db #STAIR_EXIT_STAGE_TOP
+        ENDCOMPARE
+    
+    FROM $A000
+        FILLVALUE #$CF
+        COMPARE
+        db #STAIR_ENTER_STAGE_BOTTOM
+        ENDCOMPARE
+ENDIF
+
 ; --------------------------------------
 ; location of some unused space.
 FROM BANK6_OFFSET
@@ -218,6 +233,44 @@ jump_to_stairs:
     
 ; ------------------------------------
 control_handle_stair:
+    IFDEF FLOATING_STAIRCASE_STAGE_SEVEN_FIX
+        ; special code to fall off floating stairs on stage seven.
+        LDA current_stage
+        CMP #$7
+        BNE standard_control_handle_stair
+        LDA current_substage
+        BEQ standard_control_handle_stair
+        LDA player_x+1
+        CMP #$1
+        BNE standard_control_handle_stair
+        
+        ; can't fall off while attacking
+        LDA player_state_b
+        AND #$40
+        BNE standard_control_handle_stair
+        
+        LDA player_state_atk
+        BNE standard_control_handle_stair
+        
+        ; can fall off at these specific x values.
+        LDA player_x
+        CMP #$BF
+        BEQ fall_off_floating_stairs
+        CMP #$C0
+        BEQ fall_off_floating_stairs
+        CMP #$DF
+        BEQ fall_off_floating_stairs
+        CMP #$E0
+        BEQ fall_off_floating_stairs
+        CMP #$E1
+        BNE standard_control_handle_stair
+        fall_off_floating_stairs:
+            JSR begin_jump
+            JMP control_fall_through_stairs
+    ENDIF
+
+standard_control_handle_stair:
+    ; check if jump is pressed
     LDA button_press
     AND #$80
     BEQ jump_to_stairs
@@ -225,12 +278,13 @@ control_handle_stair:
     BNE jump_to_stairs
     JSR begin_jump
     
-    ; check if down is held, fall through
+    ; check if down is held while jumping, fall through
     LDA button_down
     AND #$04
     BEQ control_handle_stair_nofall
     
     ; fall through
+control_fall_through_stairs:
     LDA #$A0
     STA player_vspeed_magnitude
     LDA #$1
