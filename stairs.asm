@@ -1,5 +1,9 @@
 IFDEF CHECK_STAIRS_ENABLED
 
+    ; can latch onto stairs above this;
+    ; actually, this has to be exactly 8 as currently written.
+    epsilon=#$8
+
     ; pass through stairs when rising.
     LDA player_vspeed_direction
     BEQ jmp_to_air_standard
@@ -19,35 +23,24 @@ IFDEF CHECK_STAIRS_ENABLED
     ENDIF
     
     IFDEF STAIR_STACK_VARIABLES
-        ; put some memory on the stack so it can be used
-        ; for variables in this function.
-        LDX #$4
-        LDA $0,X
+        ; put variables on stack back into memory
+        LDA $4
         PHA
-        INX
-      - CPX #$B
-        BNE -
-        
-        ; use these addresses for the vars instead.
-        varE=$4
-        varF=$5
-        varW=$6
-        varZ=$7
-        varX=$8
-        varY=$9
-        varYY=$a
+        LDA $5
+        PHA
+        LDA $6
+        PHA
     ENDIF
     
     ; zero store.
     LDA #$0
-    TAX
-    - STA varBL,X
-    INX
-    CPX #$4
-    BMI -
+    STA varBL
+    STA varBR
+    STA varTR
+    STA varTL
 
     ; 
-    IFNDEF load_stair_begin
+    IFNDEF load_stair_data
         LDA current_stage
         ASL
         TAX
@@ -55,17 +48,15 @@ IFDEF CHECK_STAIRS_ENABLED
         STA varE
         LDA stage_stairs_base+1,X
         STA varE+1
-    ELSE
-        JSR load_stair_begin
     ENDIF
     
     LDY #$FE
     stair_loop_begin:
         INY
+    stair_loop_begin_yinc:
         INY
         IFDEF load_stair_data
             ; retrieves stair data
-            ; high byte in varOE
             ; low byte in A
             JSR load_stair_data
         ELSE
@@ -116,36 +107,35 @@ IFDEF CHECK_STAIRS_ENABLED
         INY
         IFDEF load_stair_data
             ; load stair data high-byte
-            LDA varOE
+            JSR load_stair_data
         ELSE
             ; load stair data high-byte
             LDA (varE),Y
         ENDIF
-        DEY
         
-        TAX ; (varE),Y+1
+        TAX ; high byte of stair
         
         ; calculate x (low byte)
         AND #$f8
         STA varZ
         
-        ; add 8 for direction 2. (not sure why this is done this way...)
+        ; add 8 for direction 2. (not sure why CV does this...)
         LDA varW
         CMP #$2
         BNE +
         
-        LDA #$7
-        ; SEC ; SEC already guaranteed
-        ADC varZ
-        STA varZ
+        ; direction 2 ------------
+            LDA #$7
+            ; SEC ; SEC already guaranteed
+            ADC varZ
+            STA varZ
+            
+            ; x (high byte)
+            TXA ; high byte of stair
+            ADC #$0
+            TAX
         
-        ; x (high byte)
-        TXA ;(varE),Y+1
-        ADC #$0
-        AND #$7
-        TAX
-        
-      + TXA ;(varE),Y+1
+      + TXA ; high byte of stair (+8 if direction 2)
         AND #$7
         STA varX
         
@@ -177,13 +167,12 @@ IFDEF CHECK_STAIRS_ENABLED
         ; (check high byte)
         LDA varYY
         SBC varX
-        BNE stair_loop_begin
+        BNE stair_loop_begin_yinc
         
         ; check that dy-dx < epsilon
         LDA varOD
-        epsilon=#$8
         CMP #epsilon ; epsilon; come back to this later.
-        BCS stair_loop_begin ;  y-x >= epsilon
+        BCS stair_loop_begin_yinc ;  y-x >= epsilon
         
         ; ~~ check for other intercepting stairs ~~
         ; flip dx to match stair's direction
@@ -209,7 +198,7 @@ IFDEF CHECK_STAIRS_ENABLED
         stair_posx:
         JSR diag_compress_x
         JSR diag_compare_x
-        BCC jmp_stair_loop_begin
+        BCC jmp_stair_loop_begin_yinc
         
         store_xpos_set:
         ; store x position in varBL,X
@@ -219,15 +208,15 @@ IFDEF CHECK_STAIRS_ENABLED
         ; (X is varW, set in diag_compare_x)
         STA varBL,X
         
-        jmp_stair_loop_begin:
-        JMP stair_loop_begin
+        jmp_stair_loop_begin_yinc:
+        JMP stair_loop_begin_yinc
         
         stair_negx:
         ; get absolute value of dx, then compress it
         JSR diag_flip_prf_x
         JSR diag_compress_x
         JSR diag_compare_x
-        BCC jmp_stair_loop_begin
+        BCC jmp_stair_loop_begin_yinc
         
         store_xpos_nset:
         ; (X is varW, set in diag_compare_x)
@@ -239,24 +228,23 @@ IFDEF CHECK_STAIRS_ENABLED
         ORA #$1
         STA varBL,X
         ; next loop (BNE guaranteed.)
-        BNE jmp_stair_loop_begin
+        BNE jmp_stair_loop_begin_yinc
     
-IFDEF SECONDARY_BANK6_OFFSET
-    ; guaranteed jump
-    JMP stair_loop_end
-    FROM SECONDARY_BANK6_OFFSET
-ENDIF
+    IFDEF SECONDARY_BANK6_OFFSET
+        JMP stair_loop_end
+        FROM SECONDARY_BANK6_OFFSET
+    ENDIF
     
 stair_loop_end:
 
     IFDEF STAIR_STACK_VARIABLES
         ; put variables on stack back into memory
-        LDX #$4
         PLA
-        STA $0,X
-        INX
-      - CPX #$B
-        BNE -
+        STA $4
+        PLA
+        STA $5
+        PLA
+        STA $6
     ENDIF
 
     ; ~~ check if any varBL,X set and marked as catching ~~
@@ -273,6 +261,19 @@ stair_loop_end:
     stair_check_butterzone:
         ; found a successful match -- This is the butterzone.
         ; (a true stair collision)
+        
+        IFDEF SPECIAL_STAIRCASE_THR_WOODS
+            ; there are phantom staircases in the woods
+            ; we have to ignore them.
+            LDA current_stage
+            CMP #$2
+            BNE skip_woods
+            LDA current_substage
+            BEQ skip_woods
+            LDA player_x+1
+            BNE mincheck_loop_end
+            skip_woods:
+        ENDIF
         
         ; set stair direction
         STX player_stair_direction
@@ -303,12 +304,19 @@ stair_loop_end:
         BEQ skip_mody
         SEC
         SBC #$8
-        
         ; subtract from player_y
+        
+        skip_mody:
         CLC
         ADC player_y
+        
+        ; if player would end up out of bounds, abort.
+        CMP #$31
+        BCC mincheck_loop_end
+        CMP #$D0
+        BCS mincheck_loop_end
+        
         STA player_y
-        skip_mody:
         
         ; set vertical direction for stairs
         TXA
@@ -340,4 +348,5 @@ stair_loop_end:
         INX
         CPX #$4
         BNE mincheck_loop_start
+    mincheck_loop_end:
 ENDIF

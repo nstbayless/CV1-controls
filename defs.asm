@@ -36,9 +36,15 @@ player_hspeed_ff: db 0
 BASE $450
 player_facing: db 0
 
+; where vspeed is read from.
+; seems to read from $9b90, which
+; ranges from FB (-5) to 0.
+BASE $04F8
+vspeed_map: db 0
+
 ; start of jump: 90
 ; crest: A4->A2
-; end: 8F
+; end: 8F (see above)
 BASE $4DC
 player_vspeed_magnitude: db 0
 
@@ -132,9 +138,6 @@ button_down: db 0
 BASE $42
 time_remaining_b: db 0
 
-BASE $04F8
-vspeed_map: db 0
-
 ; array of word pointers to stage stair data offset
 ; stair data: 0-terminated list.
 ; stair (2 bytes; 1 byte if 0):
@@ -161,6 +164,7 @@ varBR: db 0
 varTR: db 0
 varTL: db 0
 
+; these two must be sequential
 varE=$E
 varF=$F
 
