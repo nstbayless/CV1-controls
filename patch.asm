@@ -168,24 +168,20 @@ custom_knockback:
     LDA player_vspeed_direction
     BEQ knockback_standard
     
-    IF 1
-        ; it'd be great to land on stairs here, but it doesn't
-        ; seem to be possible. More R&D is required.
-        IFDEF CHECK_STAIRS_ENABLED
-            ; allow landing on stairs during a knockback.
-            LDA button_down
-            AND #$02
-            BEQ +
-            ; if not knockback anymore, skip knockback update.
-            LDA #$4
-            STA player_state_a
-            PLA
-            PLA
-            PLA
-            PLA
+    IFDEF CHECK_STAIRS_ENABLED
+        ; allow landing on stairs during a knockback.
+        JSR stair_checking_subroutine
+        LDA player_state_a
+        CMP #$5
+        BEQ +
+            ; 30 iframes for getting hit.
+            LDA #$30
+            STA player_iframes
+            ; if the stun timer is not negative here, the game totally freaks out.
+            LDA #$00
+            STA player_stun_timer
             RTS
-            +
-        ENDIF
+        +
     ENDIF
     
     LDA button_down

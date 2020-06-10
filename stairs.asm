@@ -30,10 +30,12 @@ stair_checking_subroutine:
         PHA
         LDA $6
         PHA
-        LDA stair_data_buffer+$8
-        PHA
-        LDA stair_data_buffer+$9
-        PHA
+        IFDEF EXTENDED_STAIR_BUFFER
+            LDA stair_data_buffer+$8
+            PHA
+            LDA stair_data_buffer+$9
+            PHA
+        ENDIF
     ENDIF
     
     ; zero store.
@@ -299,10 +301,12 @@ stair_loop_end:
 
     IFDEF STAIR_STACK_VARIABLES
         ; put variables on stack back into memory
-        PLA
-        STA stair_data_buffer+$9
-        PLA
-        STA stair_data_buffer+$8
+        IFDEF EXTENDED_STAIR_BUFFER
+            PLA
+            STA stair_data_buffer+$9
+            PLA
+            STA stair_data_buffer+$8
+        ENDIF
         PLA
         STA $6
         PLA

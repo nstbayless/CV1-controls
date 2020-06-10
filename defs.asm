@@ -100,8 +100,13 @@ player_state_b: db 0
 ; Stun timer. This must not
 ; be negative when player begins jumping or the
 ; game will freak out.
+; (it seems it must be 0 anytime not in knockback, actually.)
 BASE $54C
 player_stun_timer: db 0
+
+; amount of invincibility time remaining.
+BASE $5B
+player_iframes: db 0
 
 ; player hitpoints
 BASE $45

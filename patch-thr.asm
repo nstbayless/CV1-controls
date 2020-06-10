@@ -10,7 +10,7 @@ BANK 4
 BASE $8000
 
 ; location of some unused space.
-FROM $B410
+FROM $B40A
 
 ; check that we only overwrite the value $FF
 FILLVALUE $FF
@@ -27,10 +27,23 @@ varY=$8
 varYY=$9
 varOD=varE ; reusing/clobbering varE
 
+; there isn't enough room for both "knockback onto stair"
+; and "extended stair buffer". (Extended stair buffer slightly
+; speeds up the stair checking routine.)
+; Also, knockback-to-stair seems to be glitchy on THR. :(
+IFNDEF ALLOW_KNOCKBACK_TO_STAIR
+    EXTENDED_STAIR_BUFFER=1
+ENDIF
+
 ; stair transfer buffer
 stair_data_buffer=$10
 ; size of stair transfer buffer
-DATA_TANSFER_N=$A
+IFDEF EXTENDED_STAIR_BUFFER
+    DATA_TANSFER_N=$A
+ELSE
+    ; must be a power of 2
+    DATA_TANSFER_N=$8
+ENDIF
 
 SPECIAL_STAIRCASES_THR=1
 SPECIAL_STAIRCASE_THR_CRYPT=1
@@ -67,21 +80,25 @@ IFDEF CHECK_STAIRS_ENABLED
         LDA stair_data_buffer
         RTS
     
-        
     load_stair_data:
-        ; if Y % DATA_TANSFER_N == 0 then we
-        ; need to replenish the stair_data_buffer.
         TYA
-        BEQ replenish_stair_data_buffer
-        BNE load_stair_data_modulo_check
-        
-    load_stair_data_modulo_subtract:
-        SBC #DATA_TANSFER_N
-        BEQ replenish_stair_data_buffer
-        
-    load_stair_data_modulo_check:
-        CMP #DATA_TANSFER_N
-        BCS load_stair_data_modulo_subtract
+        IFNDEF EXTENDED_STAIR_BUFFER
+            AND #DATA_TANSFER_N-1
+            BEQ replenish_stair_data_buffer
+        ELSE
+            ; if Y % DATA_TANSFER_N == 0 then we
+            ; need to replenish the stair_data_buffer.
+            BEQ replenish_stair_data_buffer
+            BNE load_stair_data_modulo_check
+            
+        load_stair_data_modulo_subtract:
+            SBC #DATA_TANSFER_N
+            BEQ replenish_stair_data_buffer
+            
+        load_stair_data_modulo_check:
+            CMP #DATA_TANSFER_N
+            BCS load_stair_data_modulo_subtract
+        ENDIF
         
         ; Y % DATA_TANSFER_N != 0
         ; load stair data from buffer
@@ -201,6 +218,27 @@ custom_knockback:
     BPL knockback_standard
     LDA player_vspeed_direction
     BEQ knockback_standard
+    
+    IFDEF ALLOW_KNOCKBACK_TO_STAIR
+        ; It seems that this causes glitches with the-holy-relics,
+        ; and thefore sadly isn't compatible. :(
+        IFDEF CHECK_STAIRS_ENABLED
+            ; allow landing on stairs during a knockback.
+            JSR stair_checking_subroutine
+            LDA player_state_a
+            CMP #$5
+            BEQ +
+                ; 30 iframes for getting hit.
+                LDA #$30
+                STA player_iframes
+                ; if the stun timer is not negative here, the game totally freaks out.
+                LDA #$00
+                STA player_stun_timer
+                RTS
+            +
+        ENDIF
+    ENDIF
+    
     LDA button_down
     AND #$03
     CMP #$03
