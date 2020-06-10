@@ -1,0 +1,6 @@
+BANK6_OFFSET = $BCB3
+TERTIARY_BANK6_OFFSET=$B118
+QUINTARY_BANK6_OFFSET=$BB40
+
+; stage_stairs_base=$FBEC
+read_stage_stairs_base_from=$9CC2

@@ -1,5 +1,5 @@
 ifdef USEBASE
-    INCLUDE "opt-base.asm"
+    INCLUDE "inc-base.asm"
 else
     INCNES "base.nes"
 endif

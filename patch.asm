@@ -2,19 +2,7 @@ INCLUDE "pre.asm"
 
 INCLUDE "defs.asm"
 
-ifdef PRG0
-    INCLUDE "opt-prg0.asm"
-else
-    ifdef PRG1
-        INCLUDE "opt-prg1.asm"
-    else
-        ifdef UC
-            INCLUDE "opt-uc.asm"
-        else
-            INCLUDE "opt-standard.asm"
-        endif
-    endif
-endif
+INCLUDE "opt.asm"
 
 ; ------------------------------------------------------------------------------
 BANK 6
@@ -178,7 +166,14 @@ external_stairs_rts:
 ENDIF
 
 INCLUDE "stairs.asm"
+IFDEF QUINTARY_BANK6_OFFSET
+    FROM QUINTARY_BANK6_OFFSET
+ENDIF
 INCLUDE "stairs_helper.asm"
+    
+IFDEF TERTIARY_BANK6_OFFSET
+    FROM TERTIARY_BANK6_OFFSET
+ENDIF
     
 ; ------------------------------------
 IFNDEF NO_VCANCEL
@@ -191,7 +186,7 @@ ENDIF
 store_vspeed_magnitude:
     STA player_vspeed_magnitude
     RTS
-    
+
 ; ------------------------------------
 custom_knockback:
     LDA player_hp
@@ -278,8 +273,13 @@ IFNDEF NO_AIRCONTROL
         LDA #$9B
         STA vspeed_map
         
+        +
         ; guaranteed jump
-       + BNE store_vspeed_magnitude
+        BNE store_vspeed_magnitude
+ENDIF
+    
+IFDEF QUARTIARY_BANK6_OFFSET
+    FROM QUARTIARY_BANK6_OFFSET
 ENDIF
     
 ; ------------------------------------
@@ -340,8 +340,8 @@ standard_control_handle_stair:
     LDA button_down
     AND #$04
     BEQ control_handle_stair_nofall
-    
     ; fall through
+    
 control_fall_through_stairs:
     LDA #$A0
     STA player_vspeed_magnitude

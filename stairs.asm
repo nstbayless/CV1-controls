@@ -37,6 +37,37 @@ stair_checking_subroutine:
             PHA
         ENDIF
     ENDIF
+
+    IFNDEF load_stair_data
+        ; get the stair data array start pointer.
+        LDA current_stage
+        ASL
+        TAY
+        IFNDEF read_stage_stairs_base_from
+            ; load from stage_stairs_base statically
+            LDA stage_stairs_base,Y
+            STA varE
+            LDA stage_stairs_base+1,Y
+            STA varE+1
+        ELSE
+            ; if we don't know at compile time where the stage_stairs_base is, we can load it
+            ; from this code which we know accesses it. This is helpful for hacks which may move the
+            ; stage_stairs_base pointer.
+            LDA read_stage_stairs_base_from
+
+            ; reuse varBL,varBL+1 to hold this pointer.
+            STA varBL
+
+            LDA read_stage_stairs_base_from+1
+            STA varBL+1
+
+            LDA (varBL),Y
+            STA varE
+            INY
+            LDA (varBL),Y
+            STA varE+1
+        ENDIF
+    ENDIF
     
     ; zero store.
     LDA #$0
@@ -44,17 +75,6 @@ stair_checking_subroutine:
     STA varBR
     STA varTR
     STA varTL
-
-    IFNDEF load_stair_data
-        ; get the stair data array start pointer.
-        LDA current_stage
-        ASL
-        TAX
-        LDA stage_stairs_base,X
-        STA varE
-        LDA stage_stairs_base+1,X
-        STA varE+1
-    ENDIF
     
     LDY #$FE
     stair_loop_begin:

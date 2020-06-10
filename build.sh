@@ -1,9 +1,10 @@
 # note: asm6f must be on the PATH.
-bases=(base-prg0.nes base-prg1.nes base-uc.nes base-thr.nes)
-srcs=(patch.asm patch.asm patch.asm patch-thr.asm)
-configs=(PRG0 PRG1 UC THR)
-outs=(cv1-controls-prg0 cv1-controls-prg1 cv1-controls-uc cv1-controls-thr)
-folders=("prg0" "prg1" "ultimate-cv" "the-holy-relics")
+bases=(base-prg0.nes base-prg1.nes base-uc.nes base-thr.nes base-cvbm.nes base-ood.nes base-comv2.nes)
+srcs=(patch.asm patch.asm patch.asm patch-thr.asm patch.asm patch.asm patch.asm)
+configs=(PRG0 PRG1 UC THR HACK HACKPRG0 COMV2)
+outs=(prg0 prg1 uc thr hack-prg1 hack-prg0 comv2)
+hc="hack-compatible"
+folders=("prg0" "prg1" "$hc/ultimate-cv" "$hc/the-holy-relics" "$hc/cv-hack-prg1" "$hc/cv-hack-prg0" "$hc/chorus-of-mysteries")
 
 # FALLTHROUGH_STAIRS is default behaviour, so the asm actually ignores it.
 stair_style_defs=("FALLTHROUGH_STAIRS" "LATCH_STAIRS" "CATCH_STAIRS")
@@ -16,20 +17,25 @@ then
     rm -r $export
 fi
 mkdir $export
-cp README-export.md $export/README.md
+cp README.md $export/README.md
 
-for i in 0 1 2 3
+for i in 0 1 2 3 4 5 6
 do
     BASE="${bases[$i]}"
     CONFIG="${configs[$i]}"
     SRC="${srcs[$i]}"
-    OUT="${outs[$i]}"
+    OUT="cv1-controls-${outs[$i]}"
     folder="${folders[$i]}"
     
     if [ ! -f "$SRC" ]
     then
         echo "Base ROM $SRC not found -- skipping."
         continue
+    fi
+    
+    if [ ! -d "$export/hack-compatible" ]
+    then
+        mkdir "$export/hack-compatible"
     fi
     
     mkdir "$export/$folder"
@@ -74,7 +80,7 @@ do
             if [ -f "$BASE" ]
             then
                 chmod a-w "$BASE"
-                echo "INCNES \"$BASE\"" > opt-base.asm
+                echo "INCNES \"$BASE\"" > inc-base.asm
                 which asm6f > /dev/null
                 if [ $? != 0 ]
                 then
