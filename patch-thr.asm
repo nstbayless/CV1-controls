@@ -87,6 +87,7 @@ IFDEF CHECK_STAIRS_ENABLED
         ; load stair data from buffer
         TAX
         LDA stair_data_buffer,X
+    stairs_rts:
         RTS
         
     jmp_to_air_standard:
@@ -94,7 +95,6 @@ IFDEF CHECK_STAIRS_ENABLED
 ENDIF
 
 check_stair_catch:
-
     INCLUDE "stairs.asm"
 
 ; code complies with original
@@ -142,7 +142,12 @@ check_reset_facing:
     BEQ check_v_cancel
     STY player_facing
 check_v_cancel:
-IFNDEF NO_VCANCEL
+IFDEF NO_VCANCEL
+    IFDEF CHECK_STAIRS_ENABLED
+        JSR stair_checking_subroutine
+    ENDIF
+    JMP air_standard
+ELSE
     LDA button_down
     AND #$80
     BNE jmp_to_check_stair_catch
@@ -155,14 +160,15 @@ IFNDEF NO_VCANCEL
     LDA #$17
     STA player_v_animation_counter
     
-IFDEF CHECK_STAIRS_ENABLED
-jmp_to_check_stair_catch:
-    JMP check_stair_catch
-ELSE
-    ; guaranteed branch
-    BNE jmp_to_check_stair_catch
-    jmp_to_check_stair_catch=air_standard
-ENDIF
+    IFDEF CHECK_STAIRS_ENABLED
+    jmp_to_check_stair_catch:
+        JSR stair_checking_subroutine
+        JMP air_standard
+    ELSE
+        ; guaranteed branch
+        BNE jmp_to_check_stair_catch
+        jmp_to_check_stair_catch=air_standard
+    ENDIF
     
 ; ------------------------------------
 v_cancel:
@@ -170,8 +176,6 @@ v_cancel:
     STA player_vspeed_direction
     LDA #$A2
     ; proceed to store_vspeed_magnitude
-ELSE
-    JMP check_stair_catch
 ENDIF
 
 store_vspeed_magnitude:
@@ -199,13 +203,9 @@ custom_knockback:
     BEQ knockback_standard
     LDA button_down
     AND #$03
-    BEQ RETURNB
     CMP #$03
     BNE RETURNB
-RETURNB:
-    LDY #>custom_knockback_return
-    LDX #<custom_knockback_return
-    JMP bank6_switch_jmp
+    ; if holding L+R, do standard knockback behaviour for lack of any other reasonable option.
     
 ; ------------------------------------
 knockback_standard:
@@ -215,8 +215,10 @@ knockback_standard:
     EOR #$03
     STA $00
     
-    ; return to knockback code.
-    JMP RETURNB
+RETURNB:
+    LDY #>custom_knockback_return
+    LDX #<custom_knockback_return
+    JMP bank6_switch_jmp
     
 ; ------------------------------------
 stair_standard:

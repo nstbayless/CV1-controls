@@ -88,8 +88,6 @@ FROM BANK6_OFFSET
 FILLVALUE $FF
 COMPARE
 
-jmp_to_air_standard:
-    JMP player_air_code
 custom_handle_jump:
     JSR can_control
     BNE jmp_to_air_standard
@@ -136,13 +134,14 @@ IFNDEF NO_VCANCEL
 ENDIF
     
 check_stair_catch:
-
-    INCLUDE "stairs.asm"
-        
-air_standard:
+    IFDEF CHECK_STAIRS_ENABLED
+        JSR stair_checking_subroutine
+    ENDIF
+jmp_to_air_standard:    
     ; return to original code
     JMP player_air_code
 
+INCLUDE "stairs.asm"
 INCLUDE "stairs_helper.asm"
     
 ; ------------------------------------
@@ -159,7 +158,7 @@ store_vspeed_magnitude:
     
 ; ------------------------------------
 custom_knockback:
-    LDA $45
+    LDA player_hp
     BEQ knockback_standard
     JSR can_control
     BNE knockback_standard
@@ -170,19 +169,19 @@ custom_knockback:
     BEQ knockback_standard
     LDA button_down
     AND #$03
-    BEQ RETURNB
     CMP #$03
     BNE RETURNB
-    LDA $00
-RETURNB:
-    RTS
+    ; if holding L+R, do standard knockback behaviour for lack of any other reasonable option.
     
 ; ------------------------------------
 knockback_standard:
+    ; this is the original knockback code.
     LDA player_facing
     CLC
     ADC #$01
     EOR #$03
+RETURNB:
+    ; value of A is important.
     RTS
     
 ; ------------------------------------

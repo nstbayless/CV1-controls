@@ -1,25 +1,25 @@
 IFDEF CHECK_STAIRS_ENABLED
-
+stair_checking_subroutine:
     ; can latch onto stairs above this;
     ; actually, this has to be exactly 8 as currently written.
     epsilon=#$8
 
     ; pass through stairs when rising.
     LDA player_vspeed_direction
-    BEQ jmp_to_air_standard
+    BEQ stairs_rts
 
     IFDEF CATCH_STAIRS
         ; fall through if holding down
         LDA button_down
         AND #$04
-        BNE jmp_to_air_standard
+        BNE stairs_rts
     ENDIF
     
     IFDEF LATCH_STAIRS
         ; fall through unless holding up
         LDA button_down
         AND #$08
-        BEQ jmp_to_air_standard
+        BEQ stairs_rts
     ENDIF
     
     IFDEF STAIR_STACK_VARIABLES
@@ -68,12 +68,11 @@ IFDEF CHECK_STAIRS_ENABLED
                 LDA current_stage
                 CMP #$7
                 BNE pre_load_low_byte
-                LDA current_substage
-                BEQ pre_load_low_byte
                 CPY #$10
-                BMI pre_load_low_byte
+                BCC pre_load_low_byte
                 LDA stage_seven_extradata-$10,Y
-                JMP post_load_low_byte
+                ; guaranteed branch
+                BCC post_load_low_byte
             stage_seven_extradata:
                 ; two extra staircases
                 db $74
@@ -90,6 +89,12 @@ IFDEF CHECK_STAIRS_ENABLED
     post_load_low_byte:
         BNE check_substage
         JMP stair_loop_end
+        
+        IFNDEF stairs_rts
+        ; squeeze a jumpable RTS into this opening.
+        stairs_rts:
+            RTS
+        ENDIF
     
     check_substage:
         TAX
@@ -461,8 +466,7 @@ stair_loop_end:
         LDA #$A2
         STA player_vspeed_magnitude
         
-        ; guaranteed jump
-        BNE air_standard
+        RTS
         
     IFNDEF SPECIAL_STAIRCASES_THR
         mincheck_loop_next_beq_intermediate:
@@ -472,4 +476,5 @@ stair_loop_end:
         CPX #$4
         BNE mincheck_loop_start_bne_intermediate
     mincheck_loop_end:
+        RTS
 ENDIF

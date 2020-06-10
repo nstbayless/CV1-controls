@@ -67,7 +67,7 @@ do
                     continue
                 fi
                 printf 'base size 0x%x\n' `stat --printf="%s" "$BASE"`
-                asm6f -c -n -i "-d$CONFIG" "-dUSEBASE" "-d$stair_style_def" "$SRC" "$outfile.nes"
+                asm6f -c -n -i "-d$CONFIG" $vcancel_def "-dUSEBASE" "-d$stair_style_def" "$SRC" "$outfile.nes"
                 
                 if [ $? != 0 ]
                 then
