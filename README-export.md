@@ -41,9 +41,9 @@ You can determine whether your ROM is prg0 or prg1 by comparing the hash with th
 - catch: this is the recommended behaviour. The player will land on stairs by default, and fall through by holding down.
 - latch: this is close to the CV4 behaviour. The player will land on stairs only when holding up.
 
-### V-cancelling
+### Air control
 
-`vcancel` allows the player to control the height of their jumps by releasing the jump button early.
+`vcancel` allows the player to control the height of their jumps by releasing the jump button early. `stairsonly` means that no air control is permitted at all; the only change made by the hack is stair landing/catching.
 
 ## Credits
 

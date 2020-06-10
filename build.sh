@@ -34,7 +34,7 @@ do
     
     mkdir "$export/$folder"
     
-    for k in 0 1
+    for k in 0 1 2
     do
         vcancel_def=""
         vcancel_enabled="vcancel enabled"
@@ -45,11 +45,26 @@ do
             vcancel_enabled="vcancel disabled"
             vcancel_out=""
         fi
+        if [ $k -eq 1 ]
+        then
+            vcancel_def="-dNO_AIRCONTROL"
+            vcancel_enabled="air control disabled"
+            vcancel_out="-stairs_only"
+        fi
         
         for j in 0 1 2
         do
             stair_style_def="${stair_style_defs[$j]}"
             stair_style="${stair_styles[$j]}"
+            
+            if [ $k -eq 2 ]
+            then
+                if [ $j -eq 0 ]
+                then
+                    # skip pointless "fallthrough-stairs_only" configuration.
+                    continue
+                fi
+            fi
             
             outfile="$OUT$stair_style$vcancel_out"
             

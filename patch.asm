@@ -39,11 +39,19 @@ FROM $936e
 SKIP 4
     ; 4: stair
     dw custom_handle_stair
-
+    
+IFDEF NO_AIRCONTROL
+    SKIP 4
+        ; 7: falling
+        dw custom_handle_falling
+ENDIF
+    
 ; --------------------------------------
 ; inside player's cliff-falling routine.
 FROM $93ca
 
+IFNDEF NO_AIRCONTROL
+    ; switch to jumping.
     LDA #$0D
     STA player_v_animation_counter
     NOP
@@ -51,6 +59,7 @@ FROM $93ca
     STA player_state_a
     NOP
     JMP custom_handle_cliff_drop
+ENDIF
 
 ; --------------------------------------
 ; Originally this code calculated which direction
@@ -91,34 +100,38 @@ COMPARE
 custom_handle_jump:
     JSR can_control
     BNE jmp_to_air_standard
-    LDY player_facing
-    LDA button_down
-    AND #$03
-    BNE check_right
-    LDA #$80
-    STA player_state_b
-    BNE check_v_cancel
-check_right:
-    LDX #$00
-    LSR A
-    BCC turn_left
-turn_right:
-    STX player_facing
-    LDX #$81
-    STX player_state_b
-    BCS check_reset_facing
-turn_left:
-    INX
-    STX player_facing
-    LDX #$82
-    STX player_state_b
-check_reset_facing:
-    LDA player_state_atk
-    CMP #$00
-    BEQ check_v_cancel
-    STY player_facing
-check_v_cancel:
+    
+; set direction in mid-air
+IFNDEF NO_AIRCONTROL
+        LDY player_facing
+        LDA button_down
+        AND #$03
+        BNE check_right
+        LDA #$80
+        STA player_state_b
+        BNE check_v_cancel
+    check_right:
+        LDX #$00
+        LSR A
+        BCC turn_left
+    turn_right:
+        STX player_facing
+        LDX #$81
+        STX player_state_b
+        BCS check_reset_facing
+    turn_left:
+        INX
+        STX player_facing
+        LDX #$82
+        STX player_state_b
+    check_reset_facing:
+        LDA player_state_atk
+        CMP #$00
+        BEQ check_v_cancel
+        STY player_facing
+ENDIF
 
+    check_v_cancel:
 IFNDEF NO_VCANCEL
     LDA button_down
     AND #$80
@@ -140,6 +153,29 @@ check_stair_catch:
 jmp_to_air_standard:    
     ; return to original code
     JMP player_air_code
+
+IFDEF NO_AIRCONTROL
+    custom_handle_falling:
+    IFDEF CHECK_STAIRS_ENABLED
+        LDA player_vspeed_direction
+        PHA
+        LDA #$1
+        STA player_vspeed_direction
+        DEC player_y
+        JSR stair_checking_subroutine
+        PLA
+        STA player_vspeed_direction
+    ENDIF
+    LDA player_state_a
+    CMP #$7
+    BNE external_stairs_rts
+    IFDEF CHECK_STAIRS_ENABLED
+        INC player_y
+    ENDIF
+    JMP player_fall_code
+external_stairs_rts:
+    RTS
+ENDIF
 
 INCLUDE "stairs.asm"
 INCLUDE "stairs_helper.asm"
@@ -184,11 +220,13 @@ custom_knockback:
         +
     ENDIF
     
-    LDA button_down
-    AND #$03
-    CMP #$03
-    BNE RETURNB
-    ; if holding L+R, do standard knockback behaviour for lack of any other reasonable option.
+    IFNDEF NO_AIRCONTROL
+        LDA button_down
+        AND #$03
+        CMP #$03
+        BNE RETURNB
+        ; if holding L+R, do standard knockback behaviour for lack of any other reasonable option.
+    ENDIF
     
 ; ------------------------------------
 knockback_standard:
@@ -202,7 +240,7 @@ RETURNB:
     RTS
     
 ; ------------------------------------
-; const function, determines whether or not can currently control.
+; pure function, determines whether or not can currently control.
 ; (Z if can control, z if cannot)
 can_control:
     LDA player_hp
@@ -211,34 +249,38 @@ can_control:
   + CMP #$05
     RTS
     
-; ------------------------------------
-cutscene_fall:
-    STA player_hspeed_1
-    LDX player_facing
-    INX
-    STX player_state_b
-set_falling:
-    ; note that setting falling causes 
-    LDA #$07
-    STA player_state_a
-    RTS
-    
-; ------------------------------------
-custom_handle_cliff_drop:
-    JSR can_control
-    BNE cutscene_fall
-    
-    ; if the player stun timer is not negative when a jump begins,
-    ; the game totally freaks out.
-    LDX #$00
-    STX player_stun_timer
-    INX
-    STX player_vspeed_direction
-    LDA vspeed_map
-    BNE +
-    LDA #$9B
-    STA vspeed_map
-   + BNE store_vspeed_magnitude
+IFNDEF NO_AIRCONTROL
+    ; ------------------------------------
+    cutscene_fall:
+        STA player_hspeed_1
+        LDX player_facing
+        INX
+        STX player_state_b
+    set_falling:
+        ; note that setting falling causes 
+        LDA #$07
+        STA player_state_a
+        RTS
+        
+    ; ------------------------------------
+    custom_handle_cliff_drop:
+        JSR can_control
+        BNE cutscene_fall
+        
+        ; if the player stun timer is not negative when a jump begins,
+        ; the game totally freaks out.
+        LDX #$00
+        STX player_stun_timer
+        INX
+        STX player_vspeed_direction
+        LDA vspeed_map
+        BNE +
+        LDA #$9B
+        STA vspeed_map
+        
+        ; guaranteed jump
+       + BNE store_vspeed_magnitude
+ENDIF
     
 ; ------------------------------------
 custom_handle_stair:
@@ -305,6 +347,9 @@ control_fall_through_stairs:
     STA player_vspeed_magnitude
     LDA #$1
     STA player_vspeed_direction
+    ; arrest horizontal motion
+    LDA #$80
+    STA player_state_b
     
 control_handle_stair_nofall:
     LDA #$01
@@ -325,5 +370,8 @@ stairs:                     db 0
 
 BASE $9482
 player_air_code: db 0
+
+BASE $9757
+player_fall_code: db 0
 
 ENDSUPPRESS
