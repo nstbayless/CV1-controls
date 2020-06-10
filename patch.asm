@@ -20,7 +20,7 @@ endif
 BANK 6
 BASE $8000
 
-FROM $934e:
+FROM $934c:
 
 player_step_dispatch:
     SUPPRESS
@@ -167,6 +167,27 @@ custom_knockback:
     BPL knockback_standard
     LDA player_vspeed_direction
     BEQ knockback_standard
+    
+    IF 1
+        ; it'd be great to land on stairs here, but it doesn't
+        ; seem to be possible. More R&D is required.
+        IFDEF CHECK_STAIRS_ENABLED
+            ; allow landing on stairs during a knockback.
+            LDA button_down
+            AND #$02
+            BEQ +
+            ; if not knockback anymore, skip knockback update.
+            LDA #$4
+            STA player_state_a
+            PLA
+            PLA
+            PLA
+            PLA
+            RTS
+            +
+        ENDIF
+    ENDIF
+    
     LDA button_down
     AND #$03
     CMP #$03

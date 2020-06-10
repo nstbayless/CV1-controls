@@ -87,7 +87,7 @@ IFDEF CHECK_STAIRS_ENABLED
         ; load stair data from buffer
         TAX
         LDA stair_data_buffer,X
-    stairs_rts:
+    external_stairs_rts:
         RTS
         
     jmp_to_air_standard:

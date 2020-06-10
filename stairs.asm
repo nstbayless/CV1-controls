@@ -90,10 +90,12 @@ stair_checking_subroutine:
         BNE check_substage
         JMP stair_loop_end
         
-        IFNDEF stairs_rts
+        IFNDEF external_stairs_rts
         ; squeeze a jumpable RTS into this opening.
         stairs_rts:
             RTS
+        ELSE
+            stairs_rts=external_stairs_rts
         ENDIF
     
     check_substage:
