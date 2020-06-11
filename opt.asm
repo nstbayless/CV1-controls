@@ -7,7 +7,7 @@ else
         ifdef UC
             INCLUDE "opt/opt-uc.asm"
         else
-            ifdef HACK
+            ifdef HACKPRG1
                 INCLUDE "opt/opt-hack-prg1.asm"
             else
                 ifdef HACKPRG0
@@ -16,7 +16,19 @@ else
                     ifdef COMV2
                         INCLUDE "opt/opt-comv2.asm"
                     else
-                        ERROR "A configuration is required (try -dPRG0 or -dPRG1)"
+                        ifdef COD
+                            INCLUDE "opt/opt-cod.asm"
+                        else
+                            ifdef POD
+                                INCLUDE "opt/opt-pod.asm"
+                            else
+                                ifdef REBORN
+                                    INCLUDE "opt/opt-reborn.asm"
+                                else
+                                    ERROR "A configuration is required (try -dPRG0 or -dPRG1)"
+                                endif
+                            endif
+                        endif
                     endif
                 endif
             endif

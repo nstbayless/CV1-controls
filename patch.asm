@@ -42,11 +42,11 @@ IFNDEF NO_AIRCONTROL
     ; switch to jumping.
     LDA #$0D
     STA player_v_animation_counter
-    NOP
     LDA #$01
     STA player_state_a
-    NOP
     JMP custom_handle_cliff_drop
+    NOP
+    NOP
 ENDIF
 
 ; --------------------------------------
@@ -86,8 +86,10 @@ FILLVALUE $FF
 COMPARE
 
 custom_handle_jump:
-    JSR can_control
-    BNE jmp_to_air_standard
+    IFNDEF DISABLE_CUTSCENE_SUPPORT
+        JSR can_control
+        BNE jmp_to_air_standard
+    ENDIF
     
 ; set direction in mid-air
 IFNDEF NO_AIRCONTROL
@@ -166,33 +168,28 @@ external_stairs_rts:
 ENDIF
 
 INCLUDE "stairs.asm"
+
 IFDEF QUINTARY_BANK6_OFFSET
     FROM QUINTARY_BANK6_OFFSET
 ENDIF
+
 INCLUDE "stairs_helper.asm"
     
 IFDEF TERTIARY_BANK6_OFFSET
     FROM TERTIARY_BANK6_OFFSET
 ENDIF
-    
-; ------------------------------------
-IFNDEF NO_VCANCEL
-v_cancel:
-    LDA #$01
-    STA player_vspeed_direction
-    LDA #$A2
-ENDIF
-
-store_vspeed_magnitude:
-    STA player_vspeed_magnitude
-    RTS
 
 ; ------------------------------------
 custom_knockback:
     LDA player_hp
     BEQ knockback_standard
-    JSR can_control
-    BNE knockback_standard
+    IFNDEF DISABLE_CUTSCENE_SUPPORT
+        JSR can_control
+        BNE knockback_standard
+    ELSE
+        LDA player_hp
+        BEQ knockback_standard
+    ENDIF
     LDA player_vspeed_magnitude
     CMP #$B3
     BPL knockback_standard
@@ -234,15 +231,17 @@ RETURNB:
     ; value of A is important.
     RTS
     
-; ------------------------------------
-; pure function, determines whether or not can currently control.
-; (Z if can control, z if cannot)
-can_control:
-    LDA player_hp
-    BEQ +             ; illegible, but this produces correct behaviour
-    LDA game_mode
-  + CMP #$05
-    RTS
+IFNDEF DISABLE_CUTSCENE_SUPPORT
+    ; ------------------------------------
+    ; pure function, determines whether or not can currently control.
+    ; (Z if can control, z if cannot)
+    can_control:
+        LDA player_hp
+        BEQ +             ; illegible, but this produces correct behaviour
+        LDA game_mode
+      + CMP #$05
+        RTS
+ENDIF
     
 IFNDEF NO_AIRCONTROL
     ; ------------------------------------
@@ -259,8 +258,10 @@ IFNDEF NO_AIRCONTROL
         
     ; ------------------------------------
     custom_handle_cliff_drop:
-        JSR can_control
-        BNE cutscene_fall
+        IFNDEF DISABLE_CUTSCENE_SUPPORT
+            JSR can_control
+            BNE cutscene_fall
+        ENDIF
         
         ; if the player stun timer is not negative when a jump begins,
         ; the game totally freaks out.
@@ -277,17 +278,32 @@ IFNDEF NO_AIRCONTROL
         ; guaranteed jump
         BNE store_vspeed_magnitude
 ENDIF
+
+IFDEF DISABLE_CUTSCENE_SUPPORT
+custom_handle_stair:
+    JMP control_handle_stair
+ENDIF
+
+; ------------------------------------
+IFNDEF NO_VCANCEL
+v_cancel:
+    LDA #$01
+    STA player_vspeed_direction
+    LDA #$A2
+ENDIF
+
+store_vspeed_magnitude:
+    STA player_vspeed_magnitude
+    RTS
     
 IFDEF QUARTIARY_BANK6_OFFSET
     FROM QUARTIARY_BANK6_OFFSET
 ENDIF
     
-; ------------------------------------
-custom_handle_stair:
-    JSR can_control
-    BEQ control_handle_stair
+IFDEF DISABLE_CUTSCENE_SUPPORT
 jump_to_stairs:
     JMP stairs
+ENDIF
     
 ; ------------------------------------
 control_handle_stair:
@@ -355,8 +371,28 @@ control_handle_stair_nofall:
     LDA #$01
     STA player_state_a
     JMP player_air_code
+    
+; ------------------------------------
+IFNDEF DISABLE_CUTSCENE_SUPPORT
+    custom_handle_stair:
+        JSR can_control
+        BEQ control_handle_stair
+    jump_to_stairs:
+        JMP stairs
+ENDIF
+
+IFDEF DISABLE_CUTSCENE_SUPPORT
+    ; prevent cutscene demo at start.
+FROM $B9A6
+    NOP
+    NOP
+ENDIF
 
 ENDCOMPARE
+
+IFDEF opt_code_injection_bank6
+    opt_code_injection_bank6
+ENDIF
 
 ; ------------------------------------
 ; definitions of some existing addresses

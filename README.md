@@ -4,13 +4,18 @@ This hack for Castlevania modernizes the control scheme to make it more
 like Symphony of the Night and Mega Man, allowing the player more
 control while in the air.
 
-Compatability with the following romhacks is confirmed:
+Compatability with the following romhacks is confirmed. Please see the instructions below under "Base ROM" listing which versions of this patch are compatible with which other romhacks.
  - [Ultimate Castlevania](https://www.romhacking.net/hacks/3736/)
- - [The Holy Relics](https://www.romhacking.net/hacks/3759/). (Note: Knockback onto stairs is unavailable with this version (normally this behaviour is included with `catch` and `latch`). Some lag may be encountered when using `catch` or `latch` stair behaviour -- see below.)
+ - [The Holy Relics](https://www.romhacking.net/hacks/3759/). (Note: landing on stairs while in knockback is unavailable. Some lag may be encountered when stair landing (`catch` or `latch`) is enabled.)
+
+These romhacks seem to be compatible, but have not been carefully verified. When stair landing (`catch` or `latch`) is enabled, invisible stairs may be encountered on some screens. (Invisible stairs are caused by stray normally-inaccessible stair objects in the map data; they must be patched out manually.)
  - [Castlevania Retold](https://www.romhacking.net/hacks/13/)
  - [Castlevania: Blood Moon](https://www.romhacking.net/hacks/79/)
  - [Orchestra of Despair](https://www.romhacking.net/hacks/181/)
- - [Chorus of Mysteries](https://www.romhacking.net/hacks/181/)
+ - [Chorus of Mysteries](https://www.romhacking.net/hacks/263/)
+ - [Castlevania: Overflow Darkness](https://www.romhacking.net/hacks/758/)
+ - [Castlevania: Prelude of Darkness](https://www.romhacking.net/hacks/955/). (Note: landing on stairs is not available with this hack, due to a lack of space on the ROM's bank 6. It may be possible to port some code to bank 4 as with The Holy Relics in the future if there is high demand for this hack.)
+ - [Castlevania: Reborn](https://www.romhacking.net/hacks/1107/)
 
 Source code available at https://github.com/nstbayless/CV1-controls; 
 
@@ -40,10 +45,14 @@ You can determine whether your ROM is prg0 or prg1 by comparing the hash with th
 - `prg1`: compatible with prg1 ROMs, including prg1 [!] (goodnes).
 
 Compatability with other hacks (see the "hack-compatible/" directory):
-- `hack-prg0`: compatible with several PRG0 hacks including *Orchestra of Despair*.
-- `hack-prg1`: compatible with several PRG1 hacks including *Castlevania Blood Moon* and *Castlevania Retold* (PRG1).
-- `uc`: compatible with *Ultimate Castlevania*.
+- `hack-prg0`: compatible with several PRG0 overhaul hacks including *Orchestra of Despair*.
+- `hack-prg1`: compatible with several PRG1 overhaul hacks including *Blood Moon* and *Castlevania Retold* (PRG1).
+- `uc`: compatible (only) with *Ultimate Castlevania*.
 - `thr`: compatible (only) with *The Holy Relics*.
+- `comv2`: compatible (only) with *Chorus of Mysteries*
+- `cod`: compatible with *Overflow Darkness*
+- `pod`: compatible with *Prelude of Darkness*
+- `reborn`: compatible with *Castlevania Reborn*
 
 ### Stair Behaviour
 

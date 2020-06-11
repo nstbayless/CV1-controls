@@ -1,12 +1,10 @@
 # note: asm6f must be on the PATH.
-bases=(base-prg0.nes base-prg1.nes base-uc.nes base-thr.nes base-cvbm.nes base-ood.nes base-comv2.nes)
-srcs=(patch.asm patch.asm patch.asm patch-thr.asm patch.asm patch.asm patch.asm)
-configs=(PRG0 PRG1 UC THR HACK HACKPRG0 COMV2)
-outs=(prg0 prg1 uc thr hack-prg1 hack-prg0 comv2)
+bases=(base-prg0.nes base-prg1.nes base-uc.nes base-thr.nes base-hack-prg1.nes base-hack-prg0.nes base-comv2.nes base-cod.nes base-pod.nes base-reborn.nes)
+configs=(PRG0 PRG1 UC THR HACKPRG1 HACKPRG0 COMV2 COD POD REBORN)
+outs=(prg0 prg1 uc thr hack-prg1 hack-prg0 comv2 cod pod reborn)
 hc="hack-compatible"
-folders=("prg0" "prg1" "$hc/ultimate-cv" "$hc/the-holy-relics" "$hc/cv-hack-prg1" "$hc/cv-hack-prg0" "$hc/chorus-of-mysteries")
+folders=("prg0" "prg1" "$hc/ultimate-cv" "$hc/the-holy-relics" "$hc/cv-hack-prg1" "$hc/cv-hack-prg0" "$hc/chorus-of-mysteries" "$hc/cv-overflow-darkness" "$hc/cv-prelude-of-darkness" "$hc/cv-reborn-prg0")
 
-# FALLTHROUGH_STAIRS is default behaviour, so the asm actually ignores it.
 stair_style_defs=("FALLTHROUGH_STAIRS" "LATCH_STAIRS" "CATCH_STAIRS")
 stair_styles=("-fallthrough" "-latch" "-catch")
 
@@ -19,19 +17,26 @@ fi
 mkdir $export
 cp README.md $export/README.md
 
-for i in 0 1 2 3 4 5 6
+for i in {0..9}
 do
     BASE="${bases[$i]}"
     CONFIG="${configs[$i]}"
-    SRC="${srcs[$i]}"
+    SRC="patch.asm"
+    if [ "$CONFIG" == "THR" ]
+    then
+        SRC="patch-thr.asm"
+    fi
     OUT="cv1-controls-${outs[$i]}"
     folder="${folders[$i]}"
     
-    if [ ! -f "$SRC" ]
+    if [ ! -f "$BASE" ]
     then
-        echo "Base ROM $SRC not found -- skipping."
+        echo "Base ROM $BASE not found -- skipping."
         continue
     fi
+    
+    echo
+    echo "Producing hacks for $BASE"
     
     if [ ! -d "$export/hack-compatible" ]
     then
@@ -45,13 +50,15 @@ do
         vcancel_def=""
         vcancel_enabled="vcancel enabled"
         vcancel_out="-vcancel"
+        
         if [ $k -eq 1 ]
         then
             vcancel_def="-dNO_VCANCEL"
             vcancel_enabled="vcancel disabled"
             vcancel_out=""
         fi
-        if [ $k -eq 1 ]
+        
+        if [ $k -eq 2 ]
         then
             vcancel_def="-dNO_AIRCONTROL"
             vcancel_enabled="air control disabled"
@@ -69,6 +76,19 @@ do
                 then
                     # skip pointless "fallthrough-stairs_only" configuration.
                     continue
+                fi
+            fi
+            
+            if [ "$CONFIG" == "POD" ]
+            then
+                if [ $j -gt 0 ]
+                then
+                    # stair latching is not permitted with Prelude of Darkness
+                    # (there isn't enough ROM space for it.)
+                    continue
+                else
+                    # remove "-fallthrough" from the name of the patch.
+                    stair_style=""
                 fi
             fi
             
