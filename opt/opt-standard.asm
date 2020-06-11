@@ -1,5 +1,6 @@
 BANK6_OFFSET = $BA3D
-stage_stairs_base=$FBEC
+
+read_stage_stairs_base_from=$9CC2
 
 IFDEF CHECK_STAIRS_ENABLED
     ; fixes the "crumbling tower" stage 7 nonexistent staircase.

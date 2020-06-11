@@ -24,3 +24,4 @@ export
 cv1-controls/
 *watch.txt
 inc-base.asm
+inc-opt.asm

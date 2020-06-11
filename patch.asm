@@ -2,7 +2,7 @@ INCLUDE "pre.asm"
 
 INCLUDE "defs.asm"
 
-INCLUDE "opt.asm"
+INCLUDE "inc-opt.asm"
 
 ; ------------------------------------------------------------------------------
 BANK 6

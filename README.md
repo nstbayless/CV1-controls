@@ -14,10 +14,10 @@ These romhacks seem to be compatible, but have not been carefully verified. When
  - [Orchestra of Despair](https://www.romhacking.net/hacks/181/)
  - [Chorus of Mysteries](https://www.romhacking.net/hacks/263/)
  - [Castlevania: Overflow Darkness](https://www.romhacking.net/hacks/758/)
- - [Castlevania: Prelude of Darkness](https://www.romhacking.net/hacks/955/). (Note: landing on stairs is not available with this hack, due to a lack of space on the ROM's bank 6. It may be possible to port some code to bank 4 as with The Holy Relics in the future if there is high demand for this hack.)
+ - [Castlevania: Prelude of Darkness](https://www.romhacking.net/hacks/955/).
  - [Castlevania: Reborn](https://www.romhacking.net/hacks/1107/)
 
-Source code available at https://github.com/nstbayless/CV1-controls; 
+Source code and build instructions available at https://github.com/nstbayless/CV1-controls. Feel free to combine this hack with any other hack, but please credit the author (NaOH) if distributed.
 
 ## Complete list of changes
 
@@ -33,26 +33,19 @@ Some or all of these options can be disabled by selecting a particular patch. Se
 ## How to apply
 
 Use an ips patcher, such as flips or Lunar IPS. A variety of .ips files are provided depending on what you want.
-If you're not use what you want, you likely want `prg0/cv1-controls-prg0-catch-vcancel.ips` or `prg1/cv1-controls-prg1-catch-vcancel.ips`.
+If you're not use what you want, you likely want `cv1-controls-standard-catch-vcancel.ips`.
 
-These are the options provided:
+The following sections explain the different options available.
 
 ### Base ROM
 
-You can determine whether your ROM is prg0 or prg1 by comparing the hash with the hashes listed at the bottom of this readme.
+Regardless of whether your ROM is prg0 or prg1, if you intending to use this hack with a standard Castlevania game which has no
+level modifications, use the `standard` base configuration (e.g. `cv1-controls-standard-catch-vcancel.ips`)
 
-- `prg0`: compatible with prg0 ROMs.
-- `prg1`: compatible with prg1 ROMs, including prg1 [!] (goodnes).
-
-Compatability with other hacks (see the "hack-compatible/" directory):
-- `hack-prg0`: compatible with several PRG0 overhaul hacks including *Orchestra of Despair*.
-- `hack-prg1`: compatible with several PRG1 overhaul hacks including *Blood Moon* and *Castlevania Retold* (PRG1).
-- `uc`: compatible (only) with *Ultimate Castlevania*.
+Compatability with other hacks (see the "patches-for-other-hacks/" directory):
+- `hack`: compatible with most overhaul hacks including *Orchestra of Despair*, *Blood Moon* and *Castlevania Retold*, *Chorus of Mysteries*, *Overflow Darkness*, *Prelude of Darkness*. Most hacks are likely to be compatible with this version.
 - `thr`: compatible (only) with *The Holy Relics*.
-- `comv2`: compatible (only) with *Chorus of Mysteries*
-- `cod`: compatible with *Overflow Darkness*
-- `pod`: compatible with *Prelude of Darkness*
-- `reborn`: compatible with *Castlevania Reborn*
+- `reborn`: compatible (only) with *Castlevania Reborn*.
 
 ### Stair Behaviour
 
@@ -75,7 +68,7 @@ Special thanks to revility and OmegaJP for input.
 
 ## ROM information
 
-These hashes are for the base roms that cv1-controls can be applied to.
+These hashes are for some of the base roms that cv1-controls can be applied to.
 
 PRG0 (U):
 ```
