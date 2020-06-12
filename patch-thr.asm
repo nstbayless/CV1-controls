@@ -132,6 +132,14 @@ air_standard:
 custom_handle_jump:
     JSR can_control
     BNE air_standard
+    
+    IFDEF WEIGHT
+        ; skip update on odd frames
+        LDA player_vspeed_magnitude
+        AND #$3
+        BNE check_v_cancel
+    ENDIF
+    
     LDY player_facing
     LDA button_down
     AND #$03
@@ -145,12 +153,35 @@ check_right:
     BCC turn_left
 turn_right:
     STX player_facing
+    
+    IFDEF WEIGHT
+        ; must pass through zero-hspeed first
+        LDA player_state_b
+        CMP #$82 ; air left?
+        BNE +
+    weight_store_hspeed_zero:
+        LDA #$80
+        STA player_state_b
+        ; guaranteed jump
+        BNE check_reset_facing
+        +
+    ENDIF
+    
     LDX #$81
     STX player_state_b
-    BCS check_reset_facing
+    ; guaranteed jump
+    BNE check_reset_facing
 turn_left:
     INX
     STX player_facing
+    
+    IFDEF WEIGHT
+        ; must pass through zero-hspeed first
+        LDA player_state_b
+        CMP #$81 ; air-right?
+        BEQ weight_store_hspeed_zero
+    ENDIF
+    
     LDX #$82
     STX player_state_b
 check_reset_facing:
@@ -170,9 +201,18 @@ ELSE
     BNE jmp_to_check_stair_catch
     LDA player_vspeed_direction
     BNE jmp_to_check_stair_catch
+    
+    ; dont v-cancel too early (i.e. when rising too fast)
     LDA player_vspeed_magnitude
     CMP #$95
     BMI jmp_to_check_stair_catch
+    
+    IFDEF WEIGHT
+        ; don't v-cancel too late (i.e. when rising slowly)
+        CMP #$9A
+        BPL jmp_to_check_stair_catch
+    ENDIF
+    
     JSR v_cancel
     LDA #$17
     STA player_v_animation_counter
@@ -183,16 +223,23 @@ ELSE
         JMP air_standard
     ELSE
         ; guaranteed branch
-        BNE jmp_to_check_stair_catch
+        IFDEF WEIGHT
+            JMP jmp_to_check_stair_catch
+        ELSE
+            BNE jmp_to_check_stair_catch
+        ENDIF
         jmp_to_check_stair_catch=air_standard
     ENDIF
     
 ; ------------------------------------
 v_cancel:
-    LDA #$01
-    STA player_vspeed_direction
-    LDA #$A2
-    ; proceed to store_vspeed_magnitude
+    IFDEF WEIGHT
+        LDA #$9A
+    ELSE
+        LDA #$01
+        STA player_vspeed_direction
+        LDA #$A2
+    ENDIF
 ENDIF
 
 store_vspeed_magnitude:
