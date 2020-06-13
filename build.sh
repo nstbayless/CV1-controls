@@ -105,13 +105,13 @@ do
                 fi
                 
                 weight_def="-dWEIGHT"
-                weight_enabled="weight enabled"
-                weight_out="-weight"
+                weight_enabled="inertia enabled"
+                weight_out="-inertia"
                 
                 if [ $w -eq 1 ]
                 then
                     weight_def=""
-                    weight_enabled="weight disabled"
+                    weight_enabled="inertia disabled"
                     weight_out=""
                 fi
                 

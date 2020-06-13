@@ -77,6 +77,12 @@ IFDEF CHECK_STAIRS_ENABLED
         ENDCOMPARE
 ENDIF
 
+; beginning of a jump
+FROM $940F
+    IFDEF WEIGHT_HORIZONTAL
+        JSR custom_begin_jump
+    ENDIF
+
 ; --------------------------------------
 ; location of some unused space.
 FROM BANK6_OFFSET
@@ -84,6 +90,66 @@ FROM BANK6_OFFSET
 ; check that we only overwrite the value $FF
 FILLVALUE $FF
 COMPARE
+
+IFDEF WEIGHT_HORIZONTAL
+    momentum=subweapon
+    lsr_four:
+        LSR
+        LSR
+        LSR
+        LSR
+        RTS
+    custom_begin_jump:
+        ; (original code)
+        STA $4DC
+        
+        ; set momentum
+        LDA momentum
+        AND #$0f
+        STA momentum
+        LDA button_down
+        AND #$01
+        BNE custom_begin_jump_right
+        LDA button_down
+        AND #$02
+        BNE custom_begin_jump_left
+        RTS
+    custom_begin_jump_left:
+        LDA #$70
+        ; guaranteed jump
+        BNE +
+    custom_begin_jump_right:
+        LDA #$90
+      + ORA momentum
+        STA momentum
+        RTS
+    weight_lookup_table:
+        db 7
+        db 3
+        db 3
+        db 1
+        db 1
+        db 1
+        db 0
+    weight_mincheck:
+        LDA $0
+        CMP #$ff
+        BNE add_momentum
+        INC $0
+        ; guaranteed jump
+        BEQ add_momentum
+    weight_maxcheck:
+        LDA $0
+        CMP #$01
+        BNE add_momentum
+        DEC $0
+        ; guaranteed jump
+        BEQ add_momentum
+ENDIF
+
+jmp_to_air_standard:    
+    ; return to original code
+    JMP player_air_code
 
 custom_handle_jump:
     IFNDEF DISABLE_CUTSCENE_SUPPORT
@@ -93,29 +159,135 @@ custom_handle_jump:
     
 ; set direction in mid-air
 IFNDEF NO_AIRCONTROL
-        IFDEF WEIGHT
-            ; skip update on odd frames
+        IFDEF WEIGHT_HORIZONTAL_POOR
+            ; skip update on frames not divisible by 4
             LDA player_vspeed_magnitude
             AND #$3
             BNE check_v_cancel
         ENDIF
         
-        LDY player_facing
+        IFDEF WEIGHT_HORIZONTAL
+            ; fairly involved math for weight
+            LDX #$80
+            STX player_state_b
+            LDA momentum
+            PHA ; store momentum/subweapon
+            AND #$f0
+            BEQ update_momentum
+            STA momentum
+            BMI +
+            INX
+          + INX
+            STX player_state_b
+            
+            ; reset speed to 0 except on some frames, depending on momentum
+            
+            ; absolute value
+            LDA momentum
+            BPL +
+            SEC
+            LDA #$0
+            SBC momentum
+          + JSR lsr_four
+            TAX
+            LDA timer
+            AND weight_lookup_table-1,X
+            BEQ update_momentum
+            LDA #$80
+            STA player_state_b
+            
+        update_momentum: ; increase/decrease momentum
+        
+            ; determine hold direction
+            LDA button_down
+            AND #$3
+            TAX
+            BNE +
+            ; not held; set to 1 or -1 depending on *momentum*
+            LDA momentum
+            AND #$f0
+            BEQ skip_weight
+            BMI neg_momentum
+            LDA #$ff
+            db $2C; skip (BIT trick)
+        neg_momentum:
+            LDA #$01
+            STA $0
+            
+            ; guaranteed jump
+            BNE clamp_momentum
+            
+            ; set to 1 or -1 depending on direction
+          + TXA
+            AND #$1
+            STA $0
+            TXA
+            LSR
+            SEC
+            SBC $0
+            STA $0
+            ; get upper 4 bytes of momentum in lower
+        clamp_momentum:
+            PLA
+            PHA
+            LSR
+            LSR
+            LSR
+            LSR
+            STA momentum
+            
+            ; clamp to -7,+7
+            CMP #$9
+            BEQ weight_mincheck
+            CMP #$7
+            BEQ weight_maxcheck
+        add_momentum:
+            CLC
+            LDA momentum
+            ADC $0
+            
+            ; sleight of hand
+            ASL
+            ASL
+            ASL
+            ASL
+            STA $0
+            
+            ; restore subweapon
+            PLA
+            AND #$0f
+            ORA $0
+            PHA
+            
+        skip_weight:
+            ; restore momentum / subweapon
+            PLA
+            STA momentum;
+        fin_momentum:
+        ENDIF
+        
         LDA button_down
+        LDY player_facing
         AND #$03
         BNE check_right
-        LDA #$80
-        STA player_state_b
-        BNE check_v_cancel
+        IFDEF WEIGHT_HORIZONTAL
+            ; guaranteed jump
+            BEQ check_v_cancel
+        ELSE
+            LDA #$80
+            STA player_state_b
+            ; guaranteed jump
+            BNE check_v_cancel
+        ENDIF
     check_right:
         LDX #$00
-        LSR A
+        LSR
         ; guaranteed jump
         BCC turn_left
     turn_right:
         STX player_facing
         
-        IFDEF WEIGHT
+        IFDEF WEIGHT_HORIZONTAL_POOR
             ; must pass through zero-hspeed first
             LDA player_state_b
             CMP #$82 ; air left?
@@ -128,23 +300,29 @@ IFNDEF NO_AIRCONTROL
             +
         ENDIF
         
-        LDX #$81
-        STX player_state_b
-        ; guaranteed jump
-        BNE check_reset_facing
+        IFNDEF WEIGHT_HORIZONTAL
+            LDX #$81
+            STX player_state_b
+            ; guaranteed jump
+            BNE check_reset_facing
+        ELSE
+            BCS check_reset_facing
+        ENDIF
     turn_left:
         INX
         STX player_facing
         
-        IFDEF WEIGHT
+        IFDEF WEIGHT_HORIZONTAL_POOR
             ; must pass through zero-hspeed first
             LDA player_state_b
             CMP #$81 ; air-right?
             BEQ weight_store_hspeed_zero
         ENDIF
         
-        LDX #$82
-        STX player_state_b
+        IFNDEF WEIGHT_HORIZONTAL
+            LDX #$82
+            STX player_state_b
+        ENDIF
     check_reset_facing:
         LDA player_state_atk
         CMP #$00
@@ -165,7 +343,7 @@ IFNDEF NO_VCANCEL
     CMP #$95
     BMI check_stair_catch
     
-    IFDEF WEIGHT
+    IFDEF WEIGHT_VCANCEL
         ; don't v-cancel too late (i.e. when rising slowly)
         CMP #$9A
         BPL check_stair_catch
@@ -180,8 +358,6 @@ check_stair_catch:
     IFDEF CHECK_STAIRS_ENABLED
         JSR stair_checking_subroutine
     ENDIF
-jmp_to_air_standard:    
-    ; return to original code
     JMP player_air_code
 
 IFDEF NO_AIRCONTROL
@@ -327,7 +503,7 @@ ENDIF
 ; ------------------------------------
 IFNDEF NO_VCANCEL
 v_cancel:
-    IFDEF WEIGHT
+    IFDEF WEIGHT_VCANCEL
         LDA #$9A
     ELSE
         LDA #$01
@@ -433,6 +609,10 @@ FROM $B9A6
 ENDIF
 
 ENDCOMPARE
+
+IFDEF WEIGHT_HORIZONTAL
+    include "weight.asm"
+ENDIF
 
 IFDEF opt_code_injection_bank6
     opt_code_injection_bank6

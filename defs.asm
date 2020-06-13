@@ -2,12 +2,18 @@
 ; memory address values
 ENUM $0
 
+BASE $1A
+timer: db 0
+
 BASE $28
 current_stage: db 0
 
 ; either 0 or 1
 BASE $46
 current_substage: db 0
+
+BASE $15B
+subweapon: db 0
 
 BASE $3F
 player_y: db 0
@@ -90,7 +96,7 @@ player_state_atk: db 0
 ; 1: walking right
 ; 2: walking left
 ; 4: crouching
-; 40: attacking
+; 40: attacking (but never when in the air)
 ; 80: air, vertical
 ; 81: air, right
 ; 82: air, left

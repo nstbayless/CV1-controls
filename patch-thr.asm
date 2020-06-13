@@ -133,8 +133,8 @@ custom_handle_jump:
     JSR can_control
     BNE air_standard
     
-    IFDEF WEIGHT
-        ; skip update on odd frames
+    IFDEF WEIGHT_HORIZONTAL_POOR
+        ; skip update on frames not divisible by 4
         LDA player_vspeed_magnitude
         AND #$3
         BNE check_v_cancel
@@ -149,12 +149,12 @@ custom_handle_jump:
     BNE check_v_cancel
 check_right:
     LDX #$00
-    LSR A
+    LSR
     BCC turn_left
 turn_right:
     STX player_facing
     
-    IFDEF WEIGHT
+    IFDEF WEIGHT_HORIZONTAL_POOR
         ; must pass through zero-hspeed first
         LDA player_state_b
         CMP #$82 ; air left?
@@ -175,7 +175,7 @@ turn_left:
     INX
     STX player_facing
     
-    IFDEF WEIGHT
+    IFDEF WEIGHT_HORIZONTAL_POOR
         ; must pass through zero-hspeed first
         LDA player_state_b
         CMP #$81 ; air-right?
@@ -207,7 +207,7 @@ ELSE
     CMP #$95
     BMI jmp_to_check_stair_catch
     
-    IFDEF WEIGHT
+    IFDEF WEIGHT_VCANCEL
         ; don't v-cancel too late (i.e. when rising slowly)
         CMP #$9A
         BPL jmp_to_check_stair_catch
@@ -223,7 +223,7 @@ ELSE
         JMP air_standard
     ELSE
         ; guaranteed branch
-        IFDEF WEIGHT
+        IFDEF WEIGHT_HORIZONTAL_POOR
             JMP jmp_to_check_stair_catch
         ELSE
             BNE jmp_to_check_stair_catch
@@ -233,7 +233,7 @@ ELSE
     
 ; ------------------------------------
 v_cancel:
-    IFDEF WEIGHT
+    IFDEF WEIGHT_VCANCEL
         LDA #$9A
     ELSE
         LDA #$01

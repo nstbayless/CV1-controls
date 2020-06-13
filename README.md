@@ -50,9 +50,13 @@ The following sections explain the different options available.
 - `vcancel` (Recommended.) allows the player to control the height of their jumps by releasing the jump button early.
 - `stairs_only` means that no air control is permitted at all; the only change made by the hack is stair landing/catching.
 
-### Weight
+### Inertia
 
-This option adds a very small amount inertia to the player's air movement. Players fond of extremely tight controls might prefer not to use this option; on the other hand, some players feel that without this option the player feels jarringly light.
+This option adds a bit of inertia to the player's air movement. Players fond of extremely tight controls might prefer not to use this option; on the other hand, some players feel that without this option the player feels jarringly light.
+
+When combined with *The Holy Relics*, due to a lack of ROM space in bank 6, a different version of the inertia code is used which has a bit less impact on the horizontal axis.
+
+The inertia data is stored in the same byte as the current subweapon (but using the high bits instead of the low bits). As a result, romhacks which have custom asm relating to the current subweapon are likely to be incompatible with this hack. If you are determined to add compatability yourself, please look at `weight.asm` to understand how subweapon code in the standard version was modified to be compatbile.
 
 ### Base ROM
 
