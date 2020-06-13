@@ -80,7 +80,9 @@ ENDIF
 ; beginning of a jump
 FROM $940F
     IFDEF WEIGHT_HORIZONTAL
-        JSR custom_begin_jump
+        IFNDEF NO_AIRCONTROL
+            JSR custom_begin_jump
+        ENDIF
     ENDIF
 
 ; --------------------------------------
@@ -91,60 +93,62 @@ FROM BANK6_OFFSET
 FILLVALUE $FF
 COMPARE
 
-IFDEF WEIGHT_HORIZONTAL
-    momentum=subweapon
-    lsr_four:
-        LSR
-        LSR
-        LSR
-        LSR
-        RTS
-    custom_begin_jump:
-        ; (original code)
-        STA $4DC
-        
-        ; set momentum
-        LDA momentum
-        AND #$0f
-        STA momentum
-        LDA button_down
-        AND #$01
-        BNE custom_begin_jump_right
-        LDA button_down
-        AND #$02
-        BNE custom_begin_jump_left
-        RTS
-    custom_begin_jump_left:
-        LDA #$70
-        ; guaranteed jump
-        BNE +
-    custom_begin_jump_right:
-        LDA #$90
-      + ORA momentum
-        STA momentum
-        RTS
-    weight_lookup_table:
-        db 7
-        db 3
-        db 3
-        db 1
-        db 1
-        db 1
-        db 0
-    weight_mincheck:
-        LDA $0
-        CMP #$ff
-        BNE add_momentum
-        INC $0
-        ; guaranteed jump
-        BEQ add_momentum
-    weight_maxcheck:
-        LDA $0
-        CMP #$01
-        BNE add_momentum
-        DEC $0
-        ; guaranteed jump
-        BEQ add_momentum
+IFNDEF NO_AIRCONTROL
+    IFDEF WEIGHT_HORIZONTAL
+        momentum=subweapon
+        lsr_four:
+            LSR
+            LSR
+            LSR
+            LSR
+            RTS
+        custom_begin_jump:
+            ; (original code)
+            STA $4DC
+            
+            ; set momentum
+            LDA momentum
+            AND #$0f
+            STA momentum
+            LDA button_down
+            AND #$01
+            BNE custom_begin_jump_right
+            LDA button_down
+            AND #$02
+            BNE custom_begin_jump_left
+            RTS
+        custom_begin_jump_left:
+            LDA #$70
+            ; guaranteed jump
+            BNE +
+        custom_begin_jump_right:
+            LDA #$90
+          + ORA momentum
+            STA momentum
+            RTS
+        weight_lookup_table:
+            db 7
+            db 3
+            db 3
+            db 1
+            db 1
+            db 1
+            db 0
+        weight_mincheck:
+            LDA $0
+            CMP #$ff
+            BNE add_momentum
+            INC $0
+            ; guaranteed jump
+            BEQ add_momentum
+        weight_maxcheck:
+            LDA $0
+            CMP #$01
+            BNE add_momentum
+            DEC $0
+            ; guaranteed jump
+            BEQ add_momentum
+    ENDIF
 ENDIF
 
 jmp_to_air_standard:    

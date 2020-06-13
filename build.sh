@@ -98,12 +98,6 @@ do
             # iterate: weight
             for w in 0 1
             do
-                if [ $k -eq 2 ]
-                then
-                    # skip pointless "stairs_only-weight" configuration
-                    continue
-                fi
-                
                 weight_def="-dWEIGHT"
                 weight_enabled="inertia enabled"
                 weight_out="-inertia"
@@ -113,6 +107,12 @@ do
                     weight_def=""
                     weight_enabled="inertia disabled"
                     weight_out=""
+                else
+                    if [ $k -eq 2 ]
+                    then
+                        # skip pointless "stairs_only-weight" configuration
+                        continue
+                    fi
                 fi
                 
                 outfile="$OUT-$stair_style$vcancel_out$weight_out"
