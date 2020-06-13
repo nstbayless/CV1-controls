@@ -249,13 +249,18 @@ store_vspeed_magnitude:
     RTS
 
 ; ------------------------------------
-; const function, determines whether or not can currently control.
+; pure function, determines whether or not can currently control.
 ; (Z if can control, z if cannot)
 can_control:
-    LDA player_hp
-    BEQ +             ; illegible, but this produces correct behaviour
+    ; illegible, but this produces correct behaviour
+    LDA time_remaining_a
+    BNE +
+    LDA time_remaining_b
+    BEQ ++
+  + LDA player_hp
+    BEQ ++            
     LDA game_mode
-  + CMP #$05
+ ++ CMP #$05
     RTS
 
 ; ------------------------------------
