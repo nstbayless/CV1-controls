@@ -1,4 +1,6 @@
 ; The Holy Relics-compatible hack.
+; Build instructions: please se README_BUILD.md
+
 INCLUDE "pre.asm"
 
 INCLUDE "defs.asm"

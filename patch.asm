@@ -1,3 +1,5 @@
+; Build instructions: please se README_BUILD.md
+
 INCLUDE "pre.asm"
 
 INCLUDE "defs.asm"
@@ -156,10 +158,8 @@ jmp_to_air_standard:
     JMP player_air_code
 
 custom_handle_jump:
-    IFNDEF DISABLE_CUTSCENE_SUPPORT
-        JSR can_control
-        BNE jmp_to_air_standard
-    ENDIF
+    JSR can_control
+    BNE jmp_to_air_standard
     
 ; set direction in mid-air
 IFNDEF NO_AIRCONTROL
@@ -403,13 +403,8 @@ ENDIF
 custom_knockback:
     LDA player_hp
     BEQ knockback_standard
-    IFNDEF DISABLE_CUTSCENE_SUPPORT
-        JSR can_control
-        BNE knockback_standard
-    ELSE
-        LDA player_hp
-        BEQ knockback_standard
-    ENDIF
+    JSR can_control
+    BNE knockback_standard
     LDA player_vspeed_magnitude
     CMP #$B3
     BPL knockback_standard
@@ -451,17 +446,20 @@ RETURNB:
     ; value of A is important.
     RTS
     
-IFNDEF DISABLE_CUTSCENE_SUPPORT
-    ; ------------------------------------
-    ; pure function, determines whether or not can currently control.
-    ; (Z if can control, z if cannot)
-    can_control:
-        LDA player_hp
-        BEQ +             ; illegible, but this produces correct behaviour
-        LDA game_mode
-      + CMP #$05
-        RTS
-ENDIF
+; ------------------------------------
+; pure function, determines whether or not can currently control.
+; (Z if can control, z if cannot)
+can_control:
+    ; illegible, but this produces correct behaviour
+    LDA time_remaining_a
+    BNE +
+    LDA time_remaining_b
+    BEQ ++
+  + LDA player_hp
+    BEQ ++            
+    LDA game_mode
+ ++ CMP #$05
+    RTS
     
 IFNDEF NO_AIRCONTROL
     ; ------------------------------------
@@ -478,10 +476,8 @@ IFNDEF NO_AIRCONTROL
         
     ; ------------------------------------
     custom_handle_cliff_drop:
-        IFNDEF DISABLE_CUTSCENE_SUPPORT
-            JSR can_control
-            BNE cutscene_fall
-        ENDIF
+        JSR can_control
+        BNE cutscene_fall
         
         ; if the player stun timer is not negative when a jump begins,
         ; the game totally freaks out.
@@ -497,11 +493,6 @@ IFNDEF NO_AIRCONTROL
         +
         ; guaranteed jump
         BNE store_vspeed_magnitude
-ENDIF
-
-IFDEF DISABLE_CUTSCENE_SUPPORT
-custom_handle_stair:
-    JMP control_handle_stair
 ENDIF
 
 ; ------------------------------------
@@ -522,11 +513,6 @@ store_vspeed_magnitude:
     
 IFDEF QUARTIARY_BANK6_OFFSET
     FROM QUARTIARY_BANK6_OFFSET
-ENDIF
-    
-IFDEF DISABLE_CUTSCENE_SUPPORT
-jump_to_stairs:
-    JMP stairs
 ENDIF
     
 ; ------------------------------------
@@ -597,13 +583,11 @@ control_handle_stair_nofall:
     JMP player_air_code
     
 ; ------------------------------------
-IFNDEF DISABLE_CUTSCENE_SUPPORT
-    custom_handle_stair:
-        JSR can_control
-        BEQ control_handle_stair
-    jump_to_stairs:
-        JMP stairs
-ENDIF
+custom_handle_stair:
+    JSR can_control
+    BEQ control_handle_stair
+jump_to_stairs:
+    JMP stairs
 
 IFDEF DISABLE_CUTSCENE_SUPPORT
     ; prevent cutscene demo at start.

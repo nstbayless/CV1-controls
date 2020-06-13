@@ -15,12 +15,20 @@ current_substage: db 0
 BASE $15B
 subweapon: db 0
 
+; little-endian x value in section.
+BASE $2E
+camera_x: dw 0
+
 BASE $3F
 player_y: db 0
 
 ; little-endian x value in section.
 BASE $40
 player_x: dw 0
+
+; the player's x offset from the camera
+BASE $38C
+player_x_camera_offset: db 0
 
 ; FF: right
 ; 00: stopped
@@ -79,6 +87,10 @@ player_state_a: db 0
 
 BASE $4c0
 player_stair_direction: db 0
+
+; 0 if not moving, 1 if left, 2 if right
+BASE $3C
+player_stair_direction_2: db 0
 
 BASE $3E
 player_on_stairs: db 0
@@ -148,6 +160,10 @@ button_down: db 0
 ; time remaining in seconds (last two digits)
 BASE $42
 time_remaining_b: db 0
+
+; time remaining in seconds (first two digits)
+BASE $43
+time_remaining_a: db 0
 
 ; array of word pointers to stage stair data offset
 ; stair data: 0-terminated list.

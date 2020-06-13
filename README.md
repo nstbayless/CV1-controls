@@ -35,7 +35,7 @@ Some or all of these options can be disabled by selecting a particular patch. Se
 ## How to apply
 
 Use an ips patcher, such as flips or Lunar IPS. A variety of .ips files are provided depending on what you want.
-If you're not use what you want, you likely want `cv1-controls-catch-vcancel.ips`.
+If you're not use what you want, you likely want `cv1-controls-catch-vcancel-inertia.ips`.
 
 The following sections explain the different options available.
 
@@ -61,7 +61,7 @@ The inertia data is stored in the same byte as the current subweapon (but using 
 ### Base ROM
 
 Regardless of whether your ROM is prg0 or prg1, if you intending to use this hack with a standard Castlevania game which has no level modifications, use the standard/untagged base configuration available in the root directory of the hack distribution
-(e.g. `cv1-controls-catch-vcancel.ips`).
+(e.g. `cv1-controls-catch-vcancel-inertia.ips`).
 
 Compatability with other hacks (see the "patches-for-other-hacks/" directory):
 - `hack`: compatible with most overhaul hacks including *Orchestra of Despair*, *Blood Moon* and *Castlevania Retold*, *Chorus of Mysteries*, *Overflow Darkness*, *Prelude of Darkness*. Most hacks are likely to be compatible with this version. If you're just using a graphics hack, you should use the standard patches available in the root directory instead.

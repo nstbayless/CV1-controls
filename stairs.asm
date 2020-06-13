@@ -367,10 +367,14 @@ stair_loop_end:
             BNE loop_phantom_stair_next:
             ; compare substage
             LDA thr_staircase_table,Y
-            LSR
-            LSR
-            LSR
-            LSR
+            IFDEF lsr_four
+                JSR lsr_four
+            ELSE
+                LSR
+                LSR
+                LSR
+                LSR
+            ENDIF
             LSR
             AND #$1
             CMP current_substage
@@ -379,13 +383,22 @@ stair_loop_end:
             LDA thr_staircase_table+1,Y
             AND #$0f
             CMP player_x+1
-            BEQ mincheck_loop_end
+            IFDEF THR
+                ; branch would be too far; this is equivalent
+                BEQ some_rts_thr
+            ELSE
+                BEQ mincheck_loop_end
+            ENDIF
             ; compare screen 2
             LDA thr_staircase_table+1,Y
-            LSR
-            LSR
-            LSR
-            LSR
+            IFDEF lsr_four
+                JSR lsr_four
+            ELSE
+                LSR
+                LSR
+                LSR
+                LSR
+            ENDIF
             AND #$0f
             CMP player_x+1
             BEQ mincheck_loop_end
@@ -402,6 +415,9 @@ stair_loop_end:
             
             mincheck_loop_start_bne_intermediate:
             BNE mincheck_loop_start
+            
+            some_rts_thr:
+            RTS
             
             ; data
             thr_staircase_table:
@@ -477,21 +493,33 @@ stair_loop_end:
         STA player_vspeed_direction
         
         ; have to set walking on x (player_state_b) to avoid getting stuck.
+        ; can skip this if player is already grid-aligned.
         LDX player_facing
         INX
+        TYA ; player_x , possibly -player_x % 10
+        AND #$07
+        BEQ skip_set_state_b
+        INC player_y
+        CMP #$07
+        BEQ skip_set_state_b
+        DEC player_y
+        DEC player_y
+        CMP #$01
+        BEQ skip_set_state_b
+        INC player_y
         STX player_state_b
         
         skip_set_state_b:
+        
         ; set on stair
         LDA #$1
         STA player_on_stairs
         LDA #$4
         STA player_state_a
         
-        ; zero hspeed
+        ; zero vspeed
         LDA #$A2
         STA player_vspeed_magnitude
-        
         RTS
         
     IFNDEF SPECIAL_STAIRCASES_THR
