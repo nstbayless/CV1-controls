@@ -6,7 +6,7 @@ read_stage_stairs_base_from=$9CC2
 
 ; Here we roughly try to get bank6 offset as close to
 ; the end of the bank as possible.
-BANK6_OFFSET = $BCC0
+BANK6_OFFSET = $BCB8
 
 IFDEF FALLTHROUGH_STAIRS
     BANK6_OFFSET = BANK6_OFFSET + $120
@@ -18,4 +18,10 @@ ENDIF
 
 IFDEF NO_VCANCEL
     BANK6_OFFSET = BANK6_OFFSET + $20
+ENDIF
+
+IFDEF WEIGHT
+    IFNDEF FALLTHROUGH_STAIRS
+            BANK6_WEIGHT_OFFSET=$BBA0
+    ENDIF
 ENDIF

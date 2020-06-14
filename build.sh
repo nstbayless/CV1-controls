@@ -96,13 +96,27 @@ do
             fi
             
             # iterate: weight
-            for w in 0 1
+            for w in 0 1 2
             do
                 weight_def="-dWEIGHT"
                 weight_enabled="inertia enabled"
                 weight_out="-inertia"
                 
+                if [ $w -eq 0 ]
+                then
+                    weight_def="$weight_def -dPRG0"
+                    weight_enabled="$weight_enabled (PRG0)"
+                    weight_out="$weight_out-prg0"
+                fi
+                
                 if [ $w -eq 1 ]
+                then
+                    weight_def="$weight_def -dPRG1"
+                    weight_enabled="$weight_enabled (PRG1)"
+                    weight_out="$weight_out-prg1"
+                fi
+                
+                if [ $w -eq 2 ]
                 then
                     weight_def=""
                     weight_enabled="inertia disabled"

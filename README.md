@@ -34,8 +34,9 @@ Some or all of these options can be disabled by selecting a particular patch. Se
 
 ## How to apply
 
-Use an ips patcher, such as flips or Lunar IPS. A variety of .ips files are provided depending on what you want.
-If you're not use what you want, you likely want `cv1-controls-catch-vcancel-inertia.ips`.
+Use an ips patcher, such as flips or Lunar IPS. A variety of .ips files are provided depending on what you want, and whether you're patching an already-hacked ROM. 
+
+If you're not use what you want, and you're not combining this hack with another hack such as *Ultimate Castlevania*, use `cv1-controls-catch-vcancel.ips` to start with.
 
 The following sections explain the different options available.
 
@@ -58,10 +59,14 @@ When combined with *The Holy Relics*, due to a lack of ROM space in bank 6, a di
 
 The inertia data is stored in the same byte as the current subweapon (but using the high bits instead of the low bits). As a result, romhacks which have custom asm relating to the current subweapon are likely to be incompatible with this hack. If you are determined to add compatability yourself, please look at `weight.asm` to understand how subweapon code in the standard version was modified to be compatbile.
 
+### PRG0 and PRG1
+
+`prg0` and `prg1` only matters if inertia is enabled. Some ROMs are PRG0, and some are PRG1. If you are unsure which version your ROM is, you can check the hash of your ROM and compare it with the ROM information below. The [ROM Hasher](https://www.romhacking.net/utilities/1002/) tool is useful for this.
+
 ### Base ROM
 
-Regardless of whether your ROM is prg0 or prg1, if you intending to use this hack with a standard Castlevania game which has no level modifications, use the standard/untagged base configuration available in the root directory of the hack distribution
-(e.g. `cv1-controls-catch-vcancel-inertia.ips`).
+If you intending to use this hack with a standard Castlevania game which has no level modifications, use the standard/untagged base configurations available in the root directory of the hack distribution
+(e.g. `cv1-controls-catch-vcancel.ips`).
 
 Compatability with other hacks (see the "patches-for-other-hacks/" directory):
 - `hack`: compatible with most hacks including *Ultimate Castlevania*, *Orchestra of Despair*, *Blood Moon* and *Castlevania Retold*, *Chorus of Mysteries*, *Overflow Darkness*, *Prelude of Darkness*. Most hacks are likely to be compatible with this version. If you're just using a graphics hack, you should use the standard patches available in the root directory instead.
