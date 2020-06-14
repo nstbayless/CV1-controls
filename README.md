@@ -64,7 +64,7 @@ Regardless of whether your ROM is prg0 or prg1, if you intending to use this hac
 (e.g. `cv1-controls-catch-vcancel-inertia.ips`).
 
 Compatability with other hacks (see the "patches-for-other-hacks/" directory):
-- `hack`: compatible with most overhaul hacks including *Orchestra of Despair*, *Blood Moon* and *Castlevania Retold*, *Chorus of Mysteries*, *Overflow Darkness*, *Prelude of Darkness*. Most hacks are likely to be compatible with this version. If you're just using a graphics hack, you should use the standard patches available in the root directory instead.
+- `hack`: compatible with most hacks including *Ultimate Castlevania*, *Orchestra of Despair*, *Blood Moon* and *Castlevania Retold*, *Chorus of Mysteries*, *Overflow Darkness*, *Prelude of Darkness*. Most hacks are likely to be compatible with this version. If you're just using a graphics hack, you should use the standard patches available in the root directory instead.
 - `thr`: compatible (only) with *The Holy Relics*.
 - `reborn`: compatible (only) with *Castlevania Reborn*.
 
