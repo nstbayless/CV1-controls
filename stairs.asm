@@ -37,7 +37,7 @@ stair_checking_subroutine:
             PHA
         ENDIF
     ENDIF
-
+    
     IFNDEF load_stair_data
         ; get the stair data array start pointer.
         LDA current_stage
@@ -144,6 +144,11 @@ stair_checking_subroutine:
         TXA
         AND #$f0
         STA varY
+        IFDEF VERIFY_PHANTOM_STAIRS
+            ; ignore stairs placed above y=30.
+            CMP #$30
+            BCC stair_loop_begin
+        ENDIF
         
     stair_loop_calc_dy:
         ; calculate y difference (player_y - y)

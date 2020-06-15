@@ -1,5 +1,8 @@
 read_stage_stairs_base_from=$9CC2
 
+; prevents landing on stairs which start above y=30
+VERIFY_PHANTOM_STAIRS=1
+
 ; BANK6_OFFSET could go as low as $BCB8 potentially, but
 ; higher is better as it's less likely to have a
 ; collision with another hack's custom asm.
