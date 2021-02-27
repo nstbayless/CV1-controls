@@ -19,7 +19,7 @@ These romhacks seem to be compatible, but have not been carefully verified. When
 
 Most other level hacks are likely to be compatible, though the invisible stairs glitch is likely to be encountered -- but should be fixable just by editing the levels with Stake to remove the invisible stairs.
 
-Source code and build instructions available at https://github.com/nstbayless/CV1-controls. Feel free to combine this hack with any other hack, but please credit the author (NaOH) if distributed. It's recommended to use the `hack` configuration (rather than `standard`) because 
+Source code and build instructions available at https://github.com/nstbayless/CV1-controls. Feel free to combine this hack with any other hack, but please credit the author (NaOH) if distributed. It's recommended to use the `other-hacks` configuration (rather than `standard`).
 
 ## Complete list of changes
 
@@ -65,11 +65,10 @@ The inertia data is stored in the same byte as the current subweapon (but using 
 
 ### Base ROM
 
-If you intending to use this hack with a standard Castlevania game which has no level modifications, use the standard/untagged base configurations available in the root directory of the hack distribution
-(e.g. `cv1-controls-catch-vcancel.ips`).
+If you intending to use this hack with a standard Castlevania game which has no modifications, use the `standard` configurations. (e.g. `standard/cv1-controls-catch-vcancel.ips`).
 
-Compatability with other hacks (see the "patches-for-other-hacks/" directory):
-- `hack`: compatible with most hacks including *Ultimate Castlevania*, *Orchestra of Despair*, *Blood Moon* and *Castlevania Retold*, *Chorus of Mysteries*, *Overflow Darkness*, *Prelude of Darkness*. Most hacks are likely to be compatible with this version. If you're just using a graphics hack, you should use the standard patches available in the root directory instead.
+Compatability with other hacks:
+- `other-hacks`: compatible with most hacks including *Ultimate Castlevania*, *Orchestra of Despair*, *Blood Moon* and *Castlevania Retold*, *Chorus of Mysteries*, *Overflow Darkness*, *Prelude of Darkness*. Most hacks are likely to be compatible with this version. However, if you're just using a graphics hack, you should use the standard patches available in the root directory instead.
 - `thr`: compatible (only) with *The Holy Relics*.
 - `reborn`: compatible (only) with *Castlevania Reborn*.
 

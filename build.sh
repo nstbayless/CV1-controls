@@ -2,8 +2,8 @@
 bases=(base.nes base-hack.nes base-thr.nes base-reborn.nes)
 configs=(STANDARD HACK THR REBORN)
 outs=(standard hack thr reborn)
-hc="patches-for-other-hacks"
-folders=("." "$hc/hack" "$hc/the-holy-relics" "$hc/cv-reborn")
+hc="./"
+folders=("./standard" "$hc/other-hacks" "$hc/the-holy-relics" "$hc/cv-reborn")
 
 stair_style_defs=("FALLTHROUGH_STAIRS" "LATCH_STAIRS" "CATCH_STAIRS")
 stair_styles=("fallthrough" "latch" "catch")
@@ -43,12 +43,7 @@ do
     
     echo
     echo "Producing hacks for $BASE"
-    
-    if [ ! -d "$export/$hc" ]
-    then
-        mkdir "$export/$hc"
-    fi
-    
+ 
     mkdir "$export/$folder"
     
     #iterate: vcancel / air control
@@ -161,7 +156,7 @@ do
                     fi
                     
                     #continue
-                    if ! [ -f patch.ips ]
+                    if ! [ -f "$outfile.ips" ]
                     then
                         echo
                         echo "Failed to create patch.ips"
